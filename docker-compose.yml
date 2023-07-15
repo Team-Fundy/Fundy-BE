@@ -1,11 +1,41 @@
 version: '3'
 services:
-  mysql:
+  database:
     image: mysql:8.0.33-oracle
-    container_name: ED-DB
+    container_name: Fundy-DB
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=fundy
+      - TZ="Asia/Seoul"
     ports:
       - "3308:3306"
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    stdin_open: true # `-i`
+    tty: true # `-t`
+
+  application:
+    image: openjdk:17-ea-33-jdk-buster
+    container_name: Fundy-Server
+    volumes:
+      - ./gradle:/gradle
+      - ./build.gradle:/build.gradle
+      - ./gradlew:/gradlew
+      - ./src:/src
+      - ./run-app.sh:/run-app.sh
+    stdin_open: true # `-i`
+    tty: true # `-t`
+    ports:
+      - "3333:3333"
+
+    # application.yml 파일의 내용을 무시하고 해당 환경 변수로 설정해서 실행합니다.
     environment:
-      # 실제 서비스에서 쓰일 데이터베이스 환경변수와는 무관합니다.
-      - MYSQL_ROOT_PASSWORD = root
-      - MYSQL_DATABASE = fundy
+      - SPRING_DATASOURCE_URL=jdbc:mysql://database:3306/fundy?useSSL=false&allowPublicKeyRetrieval=true&useUnicode=true&serverTimezone=Asia/Seoul
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+    command: /bin/bash /run-app.sh
+    depends_on:
+      - database
+
+
