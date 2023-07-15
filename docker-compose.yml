@@ -1,0 +1,11 @@
+version: '3'
+services:
+  mysql:
+    image: mysql:8.0.33-oracle
+    container_name: ED-DB
+    ports:
+      - "3308:3306"
+    environment:
+      # 실제 서비스에서 쓰일 데이터베이스 환경변수와는 무관합니다.
+      - MYSQL_ROOT_PASSWORD = root
+      - MYSQL_DATABASE = fundy
