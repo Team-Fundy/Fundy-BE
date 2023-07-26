@@ -33,5 +33,6 @@ public class SignUpRequest {
 
     @URL
     @Schema(description = "프로필 이미지 URL", example = "http://이미지주소", nullable = true)
+
     String profileImage;
 }

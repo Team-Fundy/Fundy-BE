@@ -43,6 +43,7 @@ public class UserController {
                 .build();
     }
 
+
     @Operation(summary = "이메일로 로그인", description = "유저가 이메일로 로그인 시도")
     @PostMapping("/login")
     public GlobalResponse<TokenInfo> login(@RequestBody @Valid final LoginRequest loginRequest) {
