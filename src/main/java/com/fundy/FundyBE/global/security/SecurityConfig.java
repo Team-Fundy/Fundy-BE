@@ -33,10 +33,13 @@ public class SecurityConfig {
                         UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests((auth) -> {
                     auth
-                            .requestMatchers("/user/sign-up").permitAll()
-                            .requestMatchers("/user/login").permitAll()
-                            .requestMatchers("/user/test").hasAuthority("NORMAL_USER");
-                            // .anyRequest().authenticated();
+                            .requestMatchers(
+                                    "/v3/api-docs/**",
+                                    "/swagger-ui/**",
+                                    "/user/sign-up",
+                                    "/user/login").permitAll()
+                            .requestMatchers("/user/test").hasAuthority("NORMAL_USER")
+                            .anyRequest().authenticated();
                 });
 
         return http.build();

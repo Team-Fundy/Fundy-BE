@@ -41,7 +41,7 @@ public class JwtProvider {
                 .collect(Collectors.toList());
 
         Date now = new Date();
-        final long tokenValidTime = 10 * 1000L; // 30분 초 밀리세컨드
+        final long tokenValidTime = 30 * 60 * 1000L; // 30분 초 밀리세컨드
         String accessToken = Jwts.builder()
                 .setSubject(authentication.getName())
                 .claim(CLAIM_NAME, authorities)

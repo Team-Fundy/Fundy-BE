@@ -60,7 +60,6 @@ public class UserService {
 
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
 
-        log.info(authentication.getName());
         return jwtProvider.generateToken(authentication);
     }
 
