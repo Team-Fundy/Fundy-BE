@@ -11,8 +11,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
-@Schema(description = "회원가입 Response")
-public class SignUpServiceResponse {
+@Schema(description = "유저 정보 Response")
+public class UserInfoServiceResponse {
     @Schema(description = "DB에 저장된 ID", example = "3bdfjakldfjalkdfj2-df...")
     private String id;
     @Schema(description = "이메일", example = "dongwon0103@naver.com")
