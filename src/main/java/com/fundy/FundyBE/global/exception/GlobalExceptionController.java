@@ -20,46 +20,43 @@ public class GlobalExceptionController {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
     public final ExceptionResponse handleMethodArgumentNotValidException(final MethodArgumentNotValidException e) {
-        return ExceptionResponse.builder()
-                .message(e.getBindingResult()
-                        .getFieldErrors()
-                        .stream().map(fieldError -> fieldError.getDefaultMessage())
-                        .collect(Collectors.toList()).toString())
-                .build();
+        return makeResponse(e.getBindingResult()
+                .getFieldErrors()
+                .stream().map(fieldError -> fieldError.getDefaultMessage())
+                .collect(Collectors.toList()).toString());
     }
 
     @ExceptionHandler({DuplicateUserException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
     public final ExceptionResponse handleDuplicateUserException(final DuplicateUserException e) {
-        return ExceptionResponse.builder()
-                .message(e.getMessage()).build();
+        return makeResponse(e.getMessage());
     }
 
     @ExceptionHandler({NoAuthorityException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
     public final ExceptionResponse handleNoAuthorityException(final NoAuthorityException e) {
-        return ExceptionResponse.builder()
-                .message(e.getMessage())
-                .build();
+        return makeResponse(e.getMessage());
     }
 
     @ExceptionHandler({CustomAuthorizationException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
     public final ExceptionResponse handleCustomAuthorizationException(final CustomAuthorizationException e) {
-        return ExceptionResponse.builder()
-                .message(e.getMessage())
-                .build();
+        return makeResponse(e.getMessage());
     }
 
     @ExceptionHandler({NoUserException.class})
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     @ResponseBody
     public final ExceptionResponse handleNoUserException(final NoUserException e) {
+        return makeResponse(e.getMessage());
+    }
+
+    private ExceptionResponse makeResponse(String message) {
         return ExceptionResponse.builder()
-                .message(e.getMessage())
+                .message(message)
                 .build();
     }
 }
