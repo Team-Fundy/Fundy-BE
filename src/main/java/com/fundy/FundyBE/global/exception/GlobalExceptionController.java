@@ -3,6 +3,7 @@ package com.fundy.FundyBE.global.exception;
 import com.fundy.FundyBE.global.exception.customException.CustomAuthorizationException;
 import com.fundy.FundyBE.global.exception.customException.DuplicateUserException;
 import com.fundy.FundyBE.global.exception.customException.NoAuthorityException;
+import com.fundy.FundyBE.global.exception.customException.NoUserException;
 import com.fundy.FundyBE.global.exception.response.ExceptionResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -48,6 +49,15 @@ public class GlobalExceptionController {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
     public final ExceptionResponse handleCustomAuthorizationException(final CustomAuthorizationException e) {
+        return ExceptionResponse.builder()
+                .message(e.getMessage())
+                .build();
+    }
+
+    @ExceptionHandler({NoUserException.class})
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ResponseBody
+    public final ExceptionResponse handleNoUserException(final NoUserException e) {
         return ExceptionResponse.builder()
                 .message(e.getMessage())
                 .build();

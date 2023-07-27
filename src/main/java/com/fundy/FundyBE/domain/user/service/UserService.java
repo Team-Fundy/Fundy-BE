@@ -5,7 +5,8 @@ import com.fundy.FundyBE.domain.user.repository.FundyUser;
 import com.fundy.FundyBE.domain.user.repository.UserRepository;
 import com.fundy.FundyBE.domain.user.service.dto.request.LoginServiceRequest;
 import com.fundy.FundyBE.domain.user.service.dto.request.SignUpServiceRequest;
-import com.fundy.FundyBE.domain.user.service.dto.response.SignUpServiceResponse;
+import com.fundy.FundyBE.domain.user.service.dto.response.UserInfoServiceResponse;
+import com.fundy.FundyBE.global.exception.customException.NoUserException;
 import com.fundy.FundyBE.global.jwt.JwtProvider;
 import com.fundy.FundyBE.global.jwt.TokenInfo;
 import com.fundy.FundyBE.global.validation.user.UserValidator;
@@ -19,6 +20,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Random;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -29,7 +31,7 @@ public class UserService {
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final JwtProvider jwtProvider;
 
-    public final SignUpServiceResponse emailSignUp(@Valid final SignUpServiceRequest signUpServiceRequest) {
+    public final UserInfoServiceResponse emailSignUp(@Valid final SignUpServiceRequest signUpServiceRequest) {
         userValidator.hasDuplicateEmail(signUpServiceRequest.getEmail());
         userValidator.hasDuplicateNickname(signUpServiceRequest.getNickname());
 
@@ -43,8 +45,19 @@ public class UserService {
                 .role(FundyRole.NORMAL_USER)
                 .build());
 
-        return SignUpServiceResponse.builder()
-                .id(fundyUser.getUsername())
+        return UserInfoServiceResponse.builder()
+                .id(fundyUser.getId().toString())
+                .email(fundyUser.getEmail())
+                .nickname(fundyUser.getNickname())
+                .profileImage(fundyUser.getProfileImage())
+                .build();
+    }
+
+    public UserInfoServiceResponse findByEmail(String email) {
+        FundyUser fundyUser = userRepository.findByEmail(email).orElseThrow(() ->
+                NoUserException.createBasic());
+        return UserInfoServiceResponse.builder()
+                .id(fundyUser.getId().toString())
                 .email(fundyUser.getEmail())
                 .nickname(fundyUser.getNickname())
                 .profileImage(fundyUser.getProfileImage())

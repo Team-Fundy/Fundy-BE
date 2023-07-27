@@ -5,7 +5,7 @@ import com.fundy.FundyBE.domain.user.controller.dto.request.SignUpRequest;
 import com.fundy.FundyBE.domain.user.service.UserService;
 import com.fundy.FundyBE.domain.user.service.dto.request.LoginServiceRequest;
 import com.fundy.FundyBE.domain.user.service.dto.request.SignUpServiceRequest;
-import com.fundy.FundyBE.domain.user.service.dto.response.SignUpServiceResponse;
+import com.fundy.FundyBE.domain.user.service.dto.response.UserInfoServiceResponse;
 import com.fundy.FundyBE.global.jwt.TokenInfo;
 import com.fundy.FundyBE.global.response.GlobalResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.security.Principal;
+
 @Slf4j
 @Tag(name = "User", description = "User 도메인 관련 API 입니다.")
 @RestController
@@ -29,15 +31,15 @@ public class UserController {
     private final UserService userService;
     @Operation(summary = "이메일 회원가입", description = "유저가 이메일로 회원가입 시도")
     @PostMapping("/sign-up")
-    public GlobalResponse<SignUpServiceResponse> emailSignUp(@RequestBody @Valid final SignUpRequest signUpRequest) {
-        SignUpServiceResponse result = userService.emailSignUp(SignUpServiceRequest.builder()
+    public GlobalResponse<UserInfoServiceResponse> emailSignUp(@RequestBody @Valid final SignUpRequest signUpRequest) {
+        UserInfoServiceResponse result = userService.emailSignUp(SignUpServiceRequest.builder()
                 .email(signUpRequest.getEmail())
                 .password(signUpRequest.getPassword())
                 .nickname(signUpRequest.getNickname())
                 .profileImage(signUpRequest.getProfileImage())
                 .build());
 
-        return GlobalResponse.<SignUpServiceResponse>builder()
+        return GlobalResponse.<UserInfoServiceResponse>builder()
                 .message("User SignUp Successful")
                 .result(result)
                 .build();
@@ -54,6 +56,16 @@ public class UserController {
         return GlobalResponse.<TokenInfo>builder()
                 .message("User login Successful")
                 .result(tokenInfo)
+                .build();
+    }
+
+    @Operation(summary = "유저 정보 조회", description = "토큰으로 유저 정보 조회",
+        security = @SecurityRequirement(name = "bearerAuth"))
+    @GetMapping("/info")
+    public GlobalResponse<UserInfoServiceResponse> getUserInfo(Principal principal) {
+        return GlobalResponse.<UserInfoServiceResponse>builder()
+                .message("User 정보 조회")
+                .result(userService.findByEmail(principal.getName()))
                 .build();
     }
 
