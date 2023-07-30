@@ -5,7 +5,11 @@ import com.fundy.FundyBE.domain.user.repository.FundyUser;
 import com.fundy.FundyBE.domain.user.repository.UserRepository;
 import com.fundy.FundyBE.domain.user.service.dto.request.LoginServiceRequest;
 import com.fundy.FundyBE.domain.user.service.dto.request.SignUpServiceRequest;
-import com.fundy.FundyBE.domain.user.service.dto.response.UserInfoServiceResponse;
+import com.fundy.FundyBE.domain.user.service.dto.request.VerifyEmailCodeServiceRequest;
+import com.fundy.FundyBE.domain.user.service.dto.response.EmailCodeResponse;
+import com.fundy.FundyBE.domain.user.service.dto.response.UserInfoResponse;
+import com.fundy.FundyBE.domain.user.service.dto.response.VerifyEmailResponse;
+import com.fundy.FundyBE.global.email.AsyncEmailSender;
 import com.fundy.FundyBE.global.exception.customException.NoUserException;
 import com.fundy.FundyBE.global.jwt.JwtProvider;
 import com.fundy.FundyBE.global.jwt.TokenInfo;
@@ -18,7 +22,6 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import java.util.Random;
 
 @Slf4j
@@ -30,8 +33,9 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final JwtProvider jwtProvider;
+    private final AsyncEmailSender emailSender;
 
-    public final UserInfoServiceResponse emailSignUp(@Valid final SignUpServiceRequest signUpServiceRequest) {
+    public final UserInfoResponse emailSignUp(@Valid final SignUpServiceRequest signUpServiceRequest) {
         userValidator.hasDuplicateEmail(signUpServiceRequest.getEmail());
         userValidator.hasDuplicateNickname(signUpServiceRequest.getNickname());
 
@@ -45,7 +49,7 @@ public class UserService {
                 .role(FundyRole.NORMAL_USER)
                 .build());
 
-        return UserInfoServiceResponse.builder()
+        return UserInfoResponse.builder()
                 .id(fundyUser.getId().toString())
                 .email(fundyUser.getEmail())
                 .nickname(fundyUser.getNickname())
@@ -53,10 +57,10 @@ public class UserService {
                 .build();
     }
 
-    public UserInfoServiceResponse findByEmail(String email) {
+    public UserInfoResponse findByEmail(String email) {
         FundyUser fundyUser = userRepository.findByEmail(email).orElseThrow(() ->
                 NoUserException.createBasic());
-        return UserInfoServiceResponse.builder()
+        return UserInfoResponse.builder()
                 .id(fundyUser.getId().toString())
                 .email(fundyUser.getEmail())
                 .nickname(fundyUser.getNickname())
@@ -76,18 +80,49 @@ public class UserService {
         return jwtProvider.generateToken(authentication);
     }
 
+    public final EmailCodeResponse sendEmailCodeAndReturnToken(String email){
+        String code = generateCode();
+        String token = jwtProvider.generateEmailVerifyToken(email, code);
+        emailSender.sendEmailCode(email, code);
+
+        return EmailCodeResponse.builder()
+                .email(email)
+                .token(token)
+                .build();
+    }
+
+    public final VerifyEmailResponse verifyTokenWithEmail(@Valid final VerifyEmailCodeServiceRequest verifyEmailCodeServiceRequest) {
+        return VerifyEmailResponse.builder()
+                .email(verifyEmailCodeServiceRequest.getEmail())
+                .verify(jwtProvider.isVerifyEmailTokenWithCode(
+                        verifyEmailCodeServiceRequest.getToken(),
+                        verifyEmailCodeServiceRequest.getEmail(),
+                        verifyEmailCodeServiceRequest.getCode()
+                ))
+                .build();
+    }
+
     private String generateNicknameIsNull(String nickname) {
         if(nickname == null) {
             int RANDOM_STRING_LENGTH = 6;
             String newNickname = "유저-"+generateRandomString(RANDOM_STRING_LENGTH);
             while(userRepository.findByNickname(newNickname).isPresent()) {
                 newNickname = "유저-"+generateRandomString(RANDOM_STRING_LENGTH);
-                System.out.println(userRepository.findByNickname(newNickname).isEmpty());
             }
             return newNickname;
         }
 
         return nickname;
+    }
+    private String generateCode() {
+        int codeSize = 6;
+        String code = "";
+        String numericCharacters = "0123456789";
+        Random random = new Random();
+        for(int i=0;i<codeSize;i++) {
+            code += numericCharacters.charAt(random.nextInt(numericCharacters.length()));
+        }
+        return code;
     }
 
     private String useBasicImageIsNull(String url) {

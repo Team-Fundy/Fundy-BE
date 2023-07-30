@@ -28,11 +28,36 @@ import java.util.stream.Collectors;
 @Component
 public class JwtProvider {
     private final Key key;
-    private final String CLAIM_NAME = "auth";
+    private final String AUTH_CLAIM_NAME = "auth";
+    private final String CODE_CLAIM_NAME = "code";
 
     public JwtProvider(@Value("${jwt.secret}") String secretKey) {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         this.key = Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    public String generateEmailVerifyToken(String email, String verifyCode) {
+        Date now = new Date();
+        final long tokenValidTime = 3 * 60 * 1000L; // 3분
+        return Jwts.builder()
+                .setSubject(email)
+                .claim(CODE_CLAIM_NAME, verifyCode)
+                .setIssuedAt(now)
+                .setExpiration(new Date(now.getTime() + tokenValidTime))
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    public boolean isVerifyEmailTokenWithCode(String token, String email, String code) {
+        Claims claims = parseClaims(token);
+        String tokenEmail = claims.getSubject();
+        String tokenCode = claims.get(CODE_CLAIM_NAME).toString();
+
+        if(email.equals(tokenEmail) && code.equals(tokenCode)) {
+            return true;
+        }
+
+        return false;
     }
 
     public TokenInfo generateToken(Authentication authentication) {
@@ -44,7 +69,7 @@ public class JwtProvider {
         final long tokenValidTime = 30 * 60 * 1000L; // 30분 초 밀리세컨드
         String accessToken = Jwts.builder()
                 .setSubject(authentication.getName())
-                .claim(CLAIM_NAME, authorities)
+                .claim(AUTH_CLAIM_NAME, authorities)
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + tokenValidTime))
                 .signWith(key, SignatureAlgorithm.HS256)
@@ -65,7 +90,7 @@ public class JwtProvider {
     public Authentication getAuthentication(String accessToken) {
         Claims claims = parseClaims(accessToken);
 
-        if(claims.get(CLAIM_NAME) == null) {
+        if(claims.get(AUTH_CLAIM_NAME) == null) {
             NoAuthorityException.createBasic();
         }
 
@@ -95,7 +120,7 @@ public class JwtProvider {
         return false;
     }
 
-    public Claims parseClaims(String accessToken) {
+    private Claims parseClaims(String accessToken) {
         try {
             return Jwts.parserBuilder()
                     .setSigningKey(key)
@@ -105,7 +130,6 @@ public class JwtProvider {
         } catch (ExpiredJwtException e) {
             return e.getClaims(); // Expired된 Jwt 던짐
         }
-
     }
 
 

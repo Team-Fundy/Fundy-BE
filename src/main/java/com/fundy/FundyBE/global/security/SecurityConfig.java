@@ -23,6 +23,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
@@ -34,12 +35,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests((auth) -> {
                     auth
                             .requestMatchers(
-                                    "/v3/api-docs/**",
-                                    "/swagger-ui/**",
-                                    "/user/sign-up",
-                                    "/user/login").permitAll()
-                            .requestMatchers("/user/test").hasAuthority("NORMAL_USER")
-                            .anyRequest().authenticated();
+                                    "/user/info").authenticated()
+                            .anyRequest().permitAll();
                 });
 
         return http.build();
