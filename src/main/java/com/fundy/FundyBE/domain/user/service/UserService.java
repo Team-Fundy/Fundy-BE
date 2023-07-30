@@ -81,6 +81,7 @@ public class UserService {
     }
 
     public final EmailCodeResponse sendEmailCodeAndReturnToken(String email){
+        userValidator.hasDuplicateEmail(email);
         String code = generateCode();
         String token = jwtProvider.generateEmailVerifyToken(email, code);
         emailSender.sendEmailCode(email, code);
