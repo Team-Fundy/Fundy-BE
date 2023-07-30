@@ -1,11 +1,16 @@
 package com.fundy.FundyBE.domain.user.controller;
 
+import com.fundy.FundyBE.domain.user.controller.dto.request.EmailCodeRequest;
 import com.fundy.FundyBE.domain.user.controller.dto.request.LoginRequest;
 import com.fundy.FundyBE.domain.user.controller.dto.request.SignUpRequest;
+import com.fundy.FundyBE.domain.user.controller.dto.request.VerifyEmailRequest;
 import com.fundy.FundyBE.domain.user.service.UserService;
 import com.fundy.FundyBE.domain.user.service.dto.request.LoginServiceRequest;
 import com.fundy.FundyBE.domain.user.service.dto.request.SignUpServiceRequest;
-import com.fundy.FundyBE.domain.user.service.dto.response.UserInfoServiceResponse;
+import com.fundy.FundyBE.domain.user.service.dto.request.VerifyEmailCodeServiceRequest;
+import com.fundy.FundyBE.domain.user.service.dto.response.EmailCodeResponse;
+import com.fundy.FundyBE.domain.user.service.dto.response.UserInfoResponse;
+import com.fundy.FundyBE.domain.user.service.dto.response.VerifyEmailResponse;
 import com.fundy.FundyBE.global.jwt.TokenInfo;
 import com.fundy.FundyBE.global.response.GlobalResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -31,15 +36,15 @@ public class UserController {
     private final UserService userService;
     @Operation(summary = "이메일 회원가입", description = "유저가 이메일로 회원가입 시도")
     @PostMapping("/sign-up")
-    public GlobalResponse<UserInfoServiceResponse> emailSignUp(@RequestBody @Valid final SignUpRequest signUpRequest) {
-        UserInfoServiceResponse result = userService.emailSignUp(SignUpServiceRequest.builder()
+    public GlobalResponse<UserInfoResponse> emailSignUp(@RequestBody @Valid final SignUpRequest signUpRequest) {
+        UserInfoResponse result = userService.emailSignUp(SignUpServiceRequest.builder()
                 .email(signUpRequest.getEmail())
                 .password(signUpRequest.getPassword())
                 .nickname(signUpRequest.getNickname())
                 .profileImage(signUpRequest.getProfileImage())
                 .build());
 
-        return GlobalResponse.<UserInfoServiceResponse>builder()
+        return GlobalResponse.<UserInfoResponse>builder()
                 .message("User SignUp Successful")
                 .result(result)
                 .build();
@@ -62,20 +67,32 @@ public class UserController {
     @Operation(summary = "유저 정보 조회", description = "토큰으로 유저 정보 조회",
         security = @SecurityRequirement(name = "bearerAuth"))
     @GetMapping("/info")
-    public GlobalResponse<UserInfoServiceResponse> getUserInfo(Principal principal) {
-        return GlobalResponse.<UserInfoServiceResponse>builder()
+    public GlobalResponse<UserInfoResponse> getUserInfo(Principal principal) {
+        return GlobalResponse.<UserInfoResponse>builder()
                 .message("User 정보 조회")
                 .result(userService.findByEmail(principal.getName()))
                 .build();
     }
 
-    @Operation(summary = "인증 테스트", description = "유저 인증 테스트",
-            security = @SecurityRequirement(name = "bearerAuth"))
-    @GetMapping("/test")
-    public GlobalResponse<String> test() {
-        return GlobalResponse.<String>builder()
-                .message("인증 테스트 성공")
-                .result("테스트 성공")
+    @Operation(summary = "이메일 인증 코드", description = "유저 이메일 인증 코드 6자리 발송")
+    @PostMapping("/email/code")
+    public GlobalResponse<EmailCodeResponse> sendEmailCode(@RequestBody @Valid final EmailCodeRequest emailCodeRequest) {
+        return GlobalResponse.<EmailCodeResponse>builder()
+                .message("인증코드 이메일 전송")
+                .result(userService.sendEmailCodeAndReturnToken(emailCodeRequest.getEmail()))
+                .build();
+    }
+
+    @PostMapping("/email/verify")
+    public GlobalResponse<VerifyEmailResponse> verifyEmail(@RequestBody @Valid final VerifyEmailRequest verifyEmailRequest) {
+        return GlobalResponse.<VerifyEmailResponse>builder()
+                .message("인증 여부 확인")
+                .result(userService.verifyTokenWithEmail(
+                        VerifyEmailCodeServiceRequest.builder()
+                                .token(verifyEmailRequest.getToken())
+                                .email(verifyEmailRequest.getEmail())
+                                .code(verifyEmailRequest.getCode())
+                                .build()))
                 .build();
     }
 }

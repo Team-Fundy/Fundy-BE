@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Fundy에서 이메일 인증 코드 발송</title>
+</head>
+<body>
+    <h3 th:text="|${email} 의 인증 코드|"></h3>
+    <div>Fundy에서 해당 이메일 인증에 대한 인증 코드입니다.</div>
+    <div style="font-weight:bold;" th:text="${code}"></div>
+</body>
+</html>

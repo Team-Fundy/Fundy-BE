@@ -16,7 +16,7 @@ import org.hibernate.validator.constraints.URL;
 @Schema(description = "사용자 회원가입 DTO")
 public class SignUpRequest {
     @NotNull(message = "이메일은 필수 입니다")
-    @Email(message = "이메일이 형식을 올바르지 않습니다")
+    @Email(message = "이메일이 올바르지 않습니다")
     @Schema(description = "이메일", example = "dongwon0103@naver.com")
     String email;
 

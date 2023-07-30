@@ -3,7 +3,7 @@ package com.fundy.FundyBE.domain.user.service;
 import com.fundy.FundyBE.domain.user.repository.FundyUser;
 import com.fundy.FundyBE.domain.user.repository.UserRepository;
 import com.fundy.FundyBE.domain.user.service.dto.request.SignUpServiceRequest;
-import com.fundy.FundyBE.domain.user.service.dto.response.UserInfoServiceResponse;
+import com.fundy.FundyBE.domain.user.service.dto.response.UserInfoResponse;
 import com.fundy.FundyBE.global.validation.user.UserValidator;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -51,7 +51,7 @@ class FundyUserServiceTest {
                 .build();
 
         //when
-        UserInfoServiceResponse response = userService.emailSignUp(request);
+        UserInfoResponse response = userService.emailSignUp(request);
 
         //then
         Assertions.assertThat(response.getEmail()).isEqualTo(request.getEmail());
