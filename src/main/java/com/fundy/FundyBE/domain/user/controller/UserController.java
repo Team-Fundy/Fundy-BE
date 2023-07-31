@@ -8,12 +8,14 @@ import com.fundy.FundyBE.domain.user.service.UserService;
 import com.fundy.FundyBE.domain.user.service.dto.request.LoginServiceRequest;
 import com.fundy.FundyBE.domain.user.service.dto.request.SignUpServiceRequest;
 import com.fundy.FundyBE.domain.user.service.dto.request.VerifyEmailCodeServiceRequest;
+import com.fundy.FundyBE.domain.user.service.dto.response.AvailableNicknameResponse;
 import com.fundy.FundyBE.domain.user.service.dto.response.EmailCodeResponse;
 import com.fundy.FundyBE.domain.user.service.dto.response.UserInfoResponse;
 import com.fundy.FundyBE.domain.user.service.dto.response.VerifyEmailResponse;
 import com.fundy.FundyBE.global.jwt.TokenInfo;
 import com.fundy.FundyBE.global.response.GlobalResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -23,6 +25,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.security.Principal;
@@ -82,7 +85,7 @@ public class UserController {
                 .result(userService.sendEmailCodeAndReturnToken(emailCodeRequest.getEmail()))
                 .build();
     }
-
+    @Operation(summary = "이메일 인증", description = "유저 이메일 인증")
     @PostMapping("/email/verify")
     public GlobalResponse<VerifyEmailResponse> verifyEmail(@RequestBody @Valid final VerifyEmailRequest verifyEmailRequest) {
         return GlobalResponse.<VerifyEmailResponse>builder()
@@ -93,6 +96,18 @@ public class UserController {
                                 .email(verifyEmailRequest.getEmail())
                                 .code(verifyEmailRequest.getCode())
                                 .build()))
+                .build();
+    }
+
+    @Operation(summary = "닉네임 중복 검사", description = "유저 닉네임 중복 검사")
+    @GetMapping
+    public GlobalResponse<AvailableNicknameResponse> isAvailableNickname(
+            @Parameter(name = "닉네임", description = "중복 검사할 닉네임", example = "유저-123")
+            @RequestParam(name = "nickname") String nickname
+    ) {
+        return GlobalResponse.<AvailableNicknameResponse>builder()
+                .message("닉네임 조회 성공")
+                .result(userService.isAvailableNickname(nickname))
                 .build();
     }
 }
