@@ -1,25 +1,18 @@
 package com.fundy.FundyBE.global.jwt;
 
-import com.fundy.FundyBE.domain.user.repository.FundyRole;
-import com.fundy.FundyBE.domain.user.repository.FundyUser;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
+import com.fundy.FundyBE.global.component.jwt.JwtProvider;
+import com.fundy.FundyBE.global.component.jwt.TokenInfo;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.doReturn;
 
 @ExtendWith(MockitoExtension.class)
