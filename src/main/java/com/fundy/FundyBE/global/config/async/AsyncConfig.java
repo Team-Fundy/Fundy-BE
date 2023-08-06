@@ -1,4 +1,4 @@
-package com.fundy.FundyBE.global.async;
+package com.fundy.FundyBE.global.config.async;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

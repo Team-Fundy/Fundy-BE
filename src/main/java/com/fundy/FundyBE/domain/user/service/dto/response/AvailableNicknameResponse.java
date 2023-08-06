@@ -13,8 +13,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @Schema(name = "닉네임 중복 검사", description = "닉네임 중복 검사 DTO")
 public class AvailableNicknameResponse {
-    @Schema(name = "닉네임", description = "검사 요청한 닉네임", example = "닉네임")
+    @Schema(description = "검사 요청한 닉네임", example = "닉네임")
     private String nickname;
-    @Schema(name = "사용가능여부", description = "사용 가능하면 true", example = "true")
+    @Schema(description = "사용 가능하면 true", example = "true")
     private boolean available;
 }

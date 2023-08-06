@@ -1,6 +1,6 @@
-package com.fundy.FundyBE.global.security.filter;
+package com.fundy.FundyBE.global.config.security.filter;
 
-import com.fundy.FundyBE.global.jwt.JwtProvider;
+import com.fundy.FundyBE.global.component.jwt.JwtProvider;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.GenericFilter;
 import jakarta.servlet.ServletException;
@@ -26,12 +26,14 @@ public class JwtAuthenticationFilter extends GenericFilter {
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        log.debug("JwtAuthenticationFilter work");
         String token = resolveToken((HttpServletRequest) request);
         if(token != null && jwtProvider.isVerifyToken(token)) {
-            Authentication authentication = jwtProvider.getAuthentication(token);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+            if(!((HttpServletRequest) request).getRequestURI().equals("/api/user/reissue")) {
+                Authentication authentication = jwtProvider.getAuthentication(token);
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
         }
+
         chain.doFilter(request,response);
     }
 
@@ -42,6 +44,5 @@ public class JwtAuthenticationFilter extends GenericFilter {
         }
 
         return null;
-//        throw CustomAuthorizationException.createBasic();
     }
 }

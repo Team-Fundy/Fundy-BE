@@ -1,4 +1,4 @@
-package com.fundy.FundyBE.global.thymeleaf;
+package com.fundy.FundyBE.global.config.thymeleaf;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

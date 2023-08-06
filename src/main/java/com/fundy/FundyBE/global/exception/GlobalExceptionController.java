@@ -4,7 +4,10 @@ import com.fundy.FundyBE.global.exception.customException.CustomAuthorizationExc
 import com.fundy.FundyBE.global.exception.customException.DuplicateUserException;
 import com.fundy.FundyBE.global.exception.customException.NoAuthorityException;
 import com.fundy.FundyBE.global.exception.customException.NoUserException;
+import com.fundy.FundyBE.global.exception.customException.RefreshTokenException;
 import com.fundy.FundyBE.global.exception.response.ExceptionResponse;
+import io.swagger.v3.oas.annotations.Hidden;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -12,9 +15,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import java.util.stream.Collectors;
-
 @ControllerAdvice
+@Hidden
 public class GlobalExceptionController {
     @ExceptionHandler({MethodArgumentNotValidException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -22,8 +24,8 @@ public class GlobalExceptionController {
     public final ExceptionResponse handleMethodArgumentNotValidException(final MethodArgumentNotValidException e) {
         return makeResponse(e.getBindingResult()
                 .getFieldErrors()
-                .stream().map(fieldError -> fieldError.getDefaultMessage())
-                .collect(Collectors.toList()).toString());
+                .stream().map(DefaultMessageSourceResolvable::getDefaultMessage)
+                .toList().toString());
     }
 
     @ExceptionHandler({DuplicateUserException.class})
@@ -51,6 +53,12 @@ public class GlobalExceptionController {
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     @ResponseBody
     public final ExceptionResponse handleNoUserException(final NoUserException e) {
+        return makeResponse(e.getMessage());
+    }
+    @ExceptionHandler({RefreshTokenException.class})
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    public final ExceptionResponse handleRefreshTokenException(final RefreshTokenException e) {
         return makeResponse(e.getMessage());
     }
 

@@ -1,4 +1,4 @@
-package com.fundy.FundyBE.global.jwt;
+package com.fundy.FundyBE.global.component.jwt;
 
 import com.fundy.FundyBE.global.exception.customException.NoAuthorityException;
 import io.jsonwebtoken.Claims;
@@ -20,6 +20,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,6 +31,9 @@ public class JwtProvider {
     private final Key key;
     private final String AUTH_CLAIM_NAME = "auth";
     private final String CODE_CLAIM_NAME = "code";
+    private final long ACCESS_DURATION = 60 * 1000L;
+    private final long REFRESH_DURATION = 24 * 60 * 60 * 1000L;
+    private final long EMAIL_DURATION = 3 * 60 * 1000L;
 
     public JwtProvider(@Value("${jwt.secret}") String secretKey) {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
@@ -38,12 +42,11 @@ public class JwtProvider {
 
     public String generateEmailVerifyToken(String email, String verifyCode) {
         Date now = new Date();
-        final long tokenValidTime = 3 * 60 * 1000L; // 3분
         return Jwts.builder()
                 .setSubject(email)
                 .claim(CODE_CLAIM_NAME, verifyCode)
                 .setIssuedAt(now)
-                .setExpiration(new Date(now.getTime() + tokenValidTime))
+                .setExpiration(new Date(now.getTime() + EMAIL_DURATION))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -61,23 +64,39 @@ public class JwtProvider {
     }
 
     public TokenInfo generateToken(Authentication authentication) {
-        List<String> authorities = authentication.getAuthorities().stream()
+        List<String> authorities = parseAuthroties(authentication.getAuthorities());
+
+        TokenInfo tokenInfo = buildToken(authorities, authentication.getName());
+
+        return tokenInfo;
+    }
+
+    public TokenInfo generateToken(Collection<? extends GrantedAuthority> authority, String email) {
+        List<String> authorities = parseAuthroties(authority);
+
+        TokenInfo tokenInfo = buildToken(authorities, email);
+
+        return tokenInfo;
+    }
+
+    private List<String> parseAuthroties (Collection<? extends GrantedAuthority> authorities) {
+        return authorities.stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
+    }
 
+    private TokenInfo buildToken(List<String> authorities, String email) {
         Date now = new Date();
-        final long tokenValidTime = 30 * 60 * 1000L; // 30분 초 밀리세컨드
         String accessToken = Jwts.builder()
-                .setSubject(authentication.getName())
+                .setSubject(email)
                 .claim(AUTH_CLAIM_NAME, authorities)
                 .setIssuedAt(now)
-                .setExpiration(new Date(now.getTime() + tokenValidTime))
+                .setExpiration(new Date(now.getTime() + ACCESS_DURATION))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
 
-        final long refreshTokenValidTime = 24 * 60 * 60 * 1000L; // 24시간 분 초 밀리세컨드
         String refreshToken = Jwts.builder()
-                .setExpiration(new Date(now.getTime() + refreshTokenValidTime))
+                .setExpiration(new Date(now.getTime() + REFRESH_DURATION))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
 
@@ -104,6 +123,11 @@ public class JwtProvider {
         return new UsernamePasswordAuthenticationToken(principal, "", authorities);
     }
 
+    public String getSubject(String token) {
+        Claims claims = parseClaims(token);
+        return claims.getSubject();
+    }
+
     public boolean isVerifyToken(String token) {
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
@@ -115,9 +139,20 @@ public class JwtProvider {
         } catch (UnsupportedJwtException e) {
             log.info("Unsupported JWT Token", e);
         } catch (IllegalArgumentException e) {
-            log.info("JWT claims string is empty.", e);
+            log.info("JWT claims string is empty", e);
         }
         return false;
+    }
+
+    public boolean canRefersh(String token) {
+        try {
+            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            return true;
+        } catch (ExpiredJwtException e) {
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     private Claims parseClaims(String accessToken) {
@@ -131,6 +166,4 @@ public class JwtProvider {
             return e.getClaims(); // Expired된 Jwt 던짐
         }
     }
-
-
 }

@@ -40,6 +40,9 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-mail:3.1.2'
 	implementation 'org.thymeleaf:thymeleaf:3.1.1.RELEASE'
 
+	// Redis
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis:3.1.2'
+
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'

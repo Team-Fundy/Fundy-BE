@@ -23,4 +23,7 @@ public class LoginServiceRequest {
     @NotNull
     @Length(min = 10, max = 30)
     private String password;
+
+    @NotNull
+    private String ip;
 }

@@ -10,5 +10,8 @@ public class FundyBeApplication {
 		SpringApplication.run(FundyBeApplication.class, args);
 	}
 	//TODO: Oauth2 구현
-	//TODO: Refresh Token 사용
+	//TODO: S3 이미지 업로더
+	//TODO: 체계적 테스트 구현
+	//TODO: 서버 자체 문서화
+	//TODO: 일반 / 크리에이터 유저 회원가입 구분
 }

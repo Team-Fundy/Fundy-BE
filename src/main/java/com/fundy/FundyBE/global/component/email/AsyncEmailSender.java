@@ -1,4 +1,4 @@
-package com.fundy.FundyBE.global.email;
+package com.fundy.FundyBE.global.component.email;
 
 import jakarta.mail.Message;
 import jakarta.mail.MessagingException;

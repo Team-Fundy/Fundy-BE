@@ -1,4 +1,4 @@
-package com.fundy.FundyBE.global.jwt;
+package com.fundy.FundyBE.global.component.jwt;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
