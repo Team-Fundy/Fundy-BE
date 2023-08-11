@@ -15,6 +15,15 @@ services:
     stdin_open: true # `-i`
     tty: true # `-t`
 
+  redis:
+    image: redis:latest
+    container_name: Fundy-Cache
+    ports:
+      - "6379:6379"
+    command: redis-server /usr/local/conf/redis.conf
+    volumes:
+      - ./redis.conf:/usr/local/conf/redis.conf
+
   application:
     image: openjdk:17-ea-33-jdk-buster
     container_name: Fundy-Server
@@ -27,7 +36,7 @@ services:
     stdin_open: true # `-i`
     tty: true # `-t`
     ports:
-      - "3333:3333"
+      - "8080:8080"
 
     # application.yml 파일의 내용을 무시하고 해당 환경 변수로 설정해서 실행합니다.
     environment:
@@ -37,5 +46,6 @@ services:
     command: /bin/bash /run-app.sh
     depends_on:
       - database
+      - redis
 
 
