@@ -170,4 +170,15 @@ public class JwtProvider {
 
         return null;
     }
+
+    public boolean canRefresh(String accessToken) {
+        try {
+            Jwts.parserBuilder().setSigningKey(accessKey).build().parseClaimsJws(accessToken);
+            return true;
+        } catch (ExpiredJwtException e) {
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 }

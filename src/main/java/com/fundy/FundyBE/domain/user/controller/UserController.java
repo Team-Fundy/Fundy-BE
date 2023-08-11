@@ -14,6 +14,7 @@ import com.fundy.FundyBE.domain.user.service.dto.response.UserInfoResponse;
 import com.fundy.FundyBE.domain.user.service.dto.response.VerifyEmailResponse;
 import com.fundy.FundyBE.global.component.jwt.TokenInfo;
 import com.fundy.FundyBE.global.exception.response.ExceptionResponse;
+import com.fundy.FundyBE.global.exception.response.JwtExceptionResponse;
 import com.fundy.FundyBE.global.response.GlobalResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -87,12 +88,13 @@ public class UserController {
 
     @Operation(summary = "유저 정보 조회", description = "토큰으로 유저 정보 조회",
         security = @SecurityRequirement(name = "bearerAuth"))
-    //TODO: 여기 api response
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "성공",
                     useReturnTypeSchema = true),
             @ApiResponse(responseCode = "400", description = "에러 발생",
-                    content = @Content(schema = @Schema(implementation = ExceptionResponse.class)))
+                    content = @Content(schema = @Schema(implementation = ExceptionResponse.class))),
+            @ApiResponse(responseCode = "403", description = "토큰 이상",
+                    content = @Content(schema = @Schema(implementation = JwtExceptionResponse.class)))
     })
     @GetMapping("/info")
     public GlobalResponse<UserInfoResponse> getUserInfo(Principal principal) {
