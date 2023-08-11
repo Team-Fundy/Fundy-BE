@@ -1,7 +1,7 @@
-package com.fundy.FundyBE.global.security;
+package com.fundy.FundyBE.global.config.security;
 
-import com.fundy.FundyBE.global.jwt.JwtProvider;
-import com.fundy.FundyBE.global.security.filter.JwtAuthenticationFilter;
+import com.fundy.FundyBE.global.config.security.filter.JwtAuthenticationFilter;
+import com.fundy.FundyBE.global.component.jwt.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

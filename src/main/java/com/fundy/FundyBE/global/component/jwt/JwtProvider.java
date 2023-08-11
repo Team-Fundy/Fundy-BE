@@ -1,4 +1,4 @@
-package com.fundy.FundyBE.global.jwt;
+package com.fundy.FundyBE.global.component.jwt;
 
 import com.fundy.FundyBE.global.exception.customException.NoAuthorityException;
 import io.jsonwebtoken.Claims;

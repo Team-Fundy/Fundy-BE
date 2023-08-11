@@ -10,11 +10,11 @@ import com.fundy.FundyBE.domain.user.service.dto.response.AvailableNicknameRespo
 import com.fundy.FundyBE.domain.user.service.dto.response.EmailCodeResponse;
 import com.fundy.FundyBE.domain.user.service.dto.response.UserInfoResponse;
 import com.fundy.FundyBE.domain.user.service.dto.response.VerifyEmailResponse;
-import com.fundy.FundyBE.global.email.AsyncEmailSender;
+import com.fundy.FundyBE.global.component.email.AsyncEmailSender;
 import com.fundy.FundyBE.global.exception.customException.DuplicateUserException;
 import com.fundy.FundyBE.global.exception.customException.NoUserException;
-import com.fundy.FundyBE.global.jwt.JwtProvider;
-import com.fundy.FundyBE.global.jwt.TokenInfo;
+import com.fundy.FundyBE.global.component.jwt.JwtProvider;
+import com.fundy.FundyBE.global.component.jwt.TokenInfo;
 import com.fundy.FundyBE.global.validation.user.UserValidator;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

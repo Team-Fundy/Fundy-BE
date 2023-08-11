@@ -12,7 +12,7 @@ import com.fundy.FundyBE.domain.user.service.dto.response.AvailableNicknameRespo
 import com.fundy.FundyBE.domain.user.service.dto.response.EmailCodeResponse;
 import com.fundy.FundyBE.domain.user.service.dto.response.UserInfoResponse;
 import com.fundy.FundyBE.domain.user.service.dto.response.VerifyEmailResponse;
-import com.fundy.FundyBE.global.jwt.TokenInfo;
+import com.fundy.FundyBE.global.component.jwt.TokenInfo;
 import com.fundy.FundyBE.global.response.GlobalResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
