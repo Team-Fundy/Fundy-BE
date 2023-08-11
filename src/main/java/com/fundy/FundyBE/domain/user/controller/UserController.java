@@ -100,9 +100,9 @@ public class UserController {
     }
 
     @Operation(summary = "닉네임 중복 검사", description = "유저 닉네임 중복 검사")
-    @GetMapping
+    @GetMapping("/check-nickname")
     public GlobalResponse<AvailableNicknameResponse> isAvailableNickname(
-            @Parameter(name = "닉네임", description = "중복 검사할 닉네임", example = "유저-123")
+            @Parameter(description = "중복 검사할 닉네임", example = "유저-123")
             @RequestParam(name = "nickname") String nickname
     ) {
         return GlobalResponse.<AvailableNicknameResponse>builder()
