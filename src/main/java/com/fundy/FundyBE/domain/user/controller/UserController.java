@@ -13,9 +13,14 @@ import com.fundy.FundyBE.domain.user.service.dto.response.EmailCodeResponse;
 import com.fundy.FundyBE.domain.user.service.dto.response.UserInfoResponse;
 import com.fundy.FundyBE.domain.user.service.dto.response.VerifyEmailResponse;
 import com.fundy.FundyBE.global.component.jwt.TokenInfo;
+import com.fundy.FundyBE.global.exception.response.ExceptionResponse;
 import com.fundy.FundyBE.global.response.GlobalResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -38,6 +43,12 @@ import java.security.Principal;
 public class UserController {
     private final UserService userService;
     @Operation(summary = "이메일 회원가입", description = "유저가 이메일로 회원가입 시도")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공",
+                    useReturnTypeSchema = true),
+            @ApiResponse(responseCode = "400", description = "에러 발생",
+                    content = @Content(schema = @Schema(implementation = ExceptionResponse.class)))
+    })
     @PostMapping("/sign-up")
     public GlobalResponse<UserInfoResponse> emailSignUp(@RequestBody @Valid final SignUpRequest signUpRequest) {
         UserInfoResponse result = userService.emailSignUp(SignUpServiceRequest.builder()
@@ -55,9 +66,16 @@ public class UserController {
 
 
     @Operation(summary = "이메일로 로그인", description = "유저가 이메일로 로그인 시도")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공",
+                    useReturnTypeSchema = true),
+            @ApiResponse(responseCode = "400", description = "에러 발생",
+                    content = @Content(schema = @Schema(implementation = ExceptionResponse.class))),
+            @ApiResponse(responseCode = "401", description = "로그인 에러",
+                    content = @Content(schema = @Schema(implementation = ExceptionResponse.class))),
+    })
     @PostMapping("/login")
     public GlobalResponse<TokenInfo> login(@RequestBody @Valid final LoginRequest loginRequest) {
-        log.info("Call /user/login");
         TokenInfo tokenInfo = userService.login(LoginServiceRequest.builder()
                 .email(loginRequest.getEmail())
                 .password(loginRequest.getPassword()).build());
@@ -69,6 +87,13 @@ public class UserController {
 
     @Operation(summary = "유저 정보 조회", description = "토큰으로 유저 정보 조회",
         security = @SecurityRequirement(name = "bearerAuth"))
+    //TODO: 여기 api response
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공",
+                    useReturnTypeSchema = true),
+            @ApiResponse(responseCode = "400", description = "에러 발생",
+                    content = @Content(schema = @Schema(implementation = ExceptionResponse.class)))
+    })
     @GetMapping("/info")
     public GlobalResponse<UserInfoResponse> getUserInfo(Principal principal) {
         return GlobalResponse.<UserInfoResponse>builder()
@@ -78,6 +103,12 @@ public class UserController {
     }
 
     @Operation(summary = "이메일 인증 코드", description = "유저 이메일 인증 코드 6자리 발송")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공",
+                    useReturnTypeSchema = true),
+            @ApiResponse(responseCode = "400", description = "에러 발생",
+                    content = @Content(schema = @Schema(implementation = ExceptionResponse.class)))
+    })
     @PostMapping("/email/code")
     public GlobalResponse<EmailCodeResponse> sendEmailCode(@RequestBody @Valid final EmailCodeRequest emailCodeRequest) {
         return GlobalResponse.<EmailCodeResponse>builder()
@@ -86,6 +117,12 @@ public class UserController {
                 .build();
     }
     @Operation(summary = "이메일 인증", description = "유저 이메일 인증")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공",
+                    useReturnTypeSchema = true),
+            @ApiResponse(responseCode = "400", description = "에러 발생",
+                    content = @Content(schema = @Schema(implementation = ExceptionResponse.class)))
+    })
     @PostMapping("/email/verify")
     public GlobalResponse<VerifyEmailResponse> verifyEmail(@RequestBody @Valid final VerifyEmailRequest verifyEmailRequest) {
         return GlobalResponse.<VerifyEmailResponse>builder()
@@ -100,6 +137,12 @@ public class UserController {
     }
 
     @Operation(summary = "닉네임 중복 검사", description = "유저 닉네임 중복 검사")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공",
+                    useReturnTypeSchema = true),
+            @ApiResponse(responseCode = "400", description = "에러 발생",
+                    content = @Content(schema = @Schema(implementation = ExceptionResponse.class)))
+    })
     @GetMapping("/check-nickname")
     public GlobalResponse<AvailableNicknameResponse> isAvailableNickname(
             @Parameter(description = "중복 검사할 닉네임", example = "유저-123")

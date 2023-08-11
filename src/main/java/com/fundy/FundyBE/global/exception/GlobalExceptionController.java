@@ -5,6 +5,7 @@ import com.fundy.FundyBE.global.exception.customException.DuplicateUserException
 import com.fundy.FundyBE.global.exception.customException.NoAuthorityException;
 import com.fundy.FundyBE.global.exception.customException.NoUserException;
 import com.fundy.FundyBE.global.exception.response.ExceptionResponse;
+import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import java.util.stream.Collectors;
 
 @ControllerAdvice
+@Hidden
 public class GlobalExceptionController {
     @ExceptionHandler({MethodArgumentNotValidException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)

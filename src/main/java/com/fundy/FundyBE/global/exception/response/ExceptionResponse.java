@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 public class ExceptionResponse {
     @Schema(description = "API 호출 시 처리 성공 여부", example = "false")
     private boolean success = false;
-    @Schema(description = "에러 발생 시 메시지", example = "이메일은 필수 입니다")
+    @Schema(description = "에러 발생 시 메시지", example = "에러 메시지")
     private String message;
     @Builder
     private ExceptionResponse(String message) {
