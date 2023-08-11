@@ -26,11 +26,12 @@ public class JwtAuthenticationFilter extends GenericFilter {
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        log.debug("JwtAuthenticationFilter work");
         String token = jwtProvider.resolveToken((HttpServletRequest) request);
-        if(token != null && jwtProvider.isVerifyToken(token, TokenType.ACCESS)) {
-            Authentication authentication = jwtProvider.getAuthentication(token);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+        if(!((HttpServletRequest) request).getRequestURI().equals("/api/user/reissue")) {
+            if(token != null && jwtProvider.isVerifyToken(token, TokenType.ACCESS)) {
+                Authentication authentication = jwtProvider.getAuthentication(token);
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
         }
         chain.doFilter(request,response);
     }

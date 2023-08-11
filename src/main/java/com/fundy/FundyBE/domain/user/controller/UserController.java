@@ -24,6 +24,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -153,6 +154,23 @@ public class UserController {
         return GlobalResponse.<AvailableNicknameResponse>builder()
                 .message("닉네임 조회 성공")
                 .result(userService.isAvailableNickname(nickname))
+                .build();
+    }
+    @Operation(summary = "토큰 재발급", description = "토큰 재발급",
+            security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공",
+                    useReturnTypeSchema = true),
+            @ApiResponse(responseCode = "400", description = "에러 발생",
+                    content = @Content(schema = @Schema(implementation = ExceptionResponse.class))),
+            @ApiResponse(responseCode = "403", description = "토큰 이상",
+                    content = @Content(schema = @Schema(implementation = JwtExceptionResponse.class)))
+    })
+    @GetMapping("/reissue")
+    GlobalResponse<TokenInfo> reissueToken(HttpServletRequest request) {
+        return GlobalResponse.<TokenInfo>builder()
+                .message("재발급 성공")
+                .result(userService.reissueToken(request))
                 .build();
     }
 }

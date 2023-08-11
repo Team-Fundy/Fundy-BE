@@ -11,11 +11,16 @@ import com.fundy.FundyBE.domain.user.service.dto.response.EmailCodeResponse;
 import com.fundy.FundyBE.domain.user.service.dto.response.UserInfoResponse;
 import com.fundy.FundyBE.domain.user.service.dto.response.VerifyEmailResponse;
 import com.fundy.FundyBE.global.component.email.AsyncEmailSender;
-import com.fundy.FundyBE.global.exception.customException.DuplicateUserException;
-import com.fundy.FundyBE.global.exception.customException.NoUserException;
 import com.fundy.FundyBE.global.component.jwt.JwtProvider;
 import com.fundy.FundyBE.global.component.jwt.TokenInfo;
+import com.fundy.FundyBE.global.component.jwt.TokenType;
+import com.fundy.FundyBE.global.config.redis.refreshInfo.RefreshInfo;
+import com.fundy.FundyBE.global.config.redis.refreshInfo.RefreshInfoRedisRepository;
+import com.fundy.FundyBE.global.exception.customException.DuplicateUserException;
+import com.fundy.FundyBE.global.exception.customException.NoUserException;
+import com.fundy.FundyBE.global.exception.customException.RefreshTokenException;
 import com.fundy.FundyBE.global.validation.user.UserValidator;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,11 +29,14 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.Random;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class UserService {
     private final UserRepository userRepository;
     private final UserValidator userValidator;
@@ -36,8 +44,10 @@ public class UserService {
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final JwtProvider jwtProvider;
     private final AsyncEmailSender emailSender;
+    private final RefreshInfoRedisRepository refreshInfoRedisRepository;
 
-    public final UserInfoResponse emailSignUp(@Valid final SignUpServiceRequest signUpServiceRequest) {
+    @Transactional
+    public UserInfoResponse emailSignUp(@Valid final SignUpServiceRequest signUpServiceRequest) {
         userValidator.hasDuplicateEmail(signUpServiceRequest.getEmail());
         userValidator.hasDuplicateNickname(signUpServiceRequest.getNickname());
 
@@ -72,19 +82,39 @@ public class UserService {
                 .build();
     }
 
-    public final TokenInfo login(@Valid final LoginServiceRequest loginServiceRequest) {
-        log.debug("Call login service");
+    @Transactional
+    public TokenInfo login(@Valid final LoginServiceRequest loginServiceRequest) {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
           loginServiceRequest.getEmail(),
           loginServiceRequest.getPassword()
         );
 
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
+        TokenInfo tokenInfo = jwtProvider.generateToken(authentication);
+        refreshInfoRedisRepository.save(RefreshInfo.builder()
+                .id(authentication.getName())
+                .authorities(authentication.getAuthorities())
+                .refreshToken(tokenInfo.getRefreshToken())
+                .build());
 
         return jwtProvider.generateToken(authentication);
     }
+    @Transactional
+    public TokenInfo reissueToken(HttpServletRequest request) {
+        String refreshToken = jwtProvider.resolveToken(request);
 
-    public final EmailCodeResponse sendEmailCodeAndReturnToken(String email){
+        if(refreshToken == null || !jwtProvider.isVerifyToken(refreshToken, TokenType.REFRESH))
+            throw RefreshTokenException.createBasic();
+
+        RefreshInfo refreshInfo = refreshInfoRedisRepository.findByRefreshToken(refreshToken).orElseThrow(RefreshTokenException::createBasic);
+        TokenInfo tokenInfo = jwtProvider.generateTokenWithRefreshInfo(refreshInfo);
+        refreshInfo.setRefreshToken(tokenInfo.getRefreshToken());
+        refreshInfoRedisRepository.save(refreshInfo);
+
+        return tokenInfo;
+    }
+
+    public EmailCodeResponse sendEmailCodeAndReturnToken(String email){
         userValidator.hasDuplicateEmail(email);
         String code = generateCode();
         String token = jwtProvider.generateEmailVerifyToken(email, code);
@@ -96,7 +126,7 @@ public class UserService {
                 .build();
     }
 
-    public final VerifyEmailResponse verifyTokenWithEmail(@Valid final VerifyEmailCodeServiceRequest verifyEmailCodeServiceRequest) {
+    public VerifyEmailResponse verifyTokenWithEmail(@Valid final VerifyEmailCodeServiceRequest verifyEmailCodeServiceRequest) {
         return VerifyEmailResponse.builder()
                 .email(verifyEmailCodeServiceRequest.getEmail())
                 .verify(jwtProvider.isVerifyEmailTokenWithCode(
@@ -107,7 +137,7 @@ public class UserService {
                 .build();
     }
 
-    public final AvailableNicknameResponse isAvailableNickname(String nickname) {
+    public AvailableNicknameResponse isAvailableNickname(String nickname) {
         try {
             userValidator.hasDuplicateNickname(nickname);
         } catch (DuplicateUserException e) {

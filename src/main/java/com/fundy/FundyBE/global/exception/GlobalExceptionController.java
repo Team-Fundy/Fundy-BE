@@ -4,6 +4,7 @@ import com.fundy.FundyBE.global.exception.customException.CustomAuthorizationExc
 import com.fundy.FundyBE.global.exception.customException.DuplicateUserException;
 import com.fundy.FundyBE.global.exception.customException.NoAuthorityException;
 import com.fundy.FundyBE.global.exception.customException.NoUserException;
+import com.fundy.FundyBE.global.exception.customException.RefreshTokenException;
 import com.fundy.FundyBE.global.exception.response.ExceptionResponse;
 import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.http.HttpStatus;
@@ -53,6 +54,13 @@ public class GlobalExceptionController {
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     @ResponseBody
     public final ExceptionResponse handleNoUserException(final NoUserException e) {
+        return makeResponse(e.getMessage());
+    }
+
+    @ExceptionHandler({RefreshTokenException.class})
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    public final ExceptionResponse handleRefreshTokenException(final RefreshTokenException e) {
         return makeResponse(e.getMessage());
     }
 

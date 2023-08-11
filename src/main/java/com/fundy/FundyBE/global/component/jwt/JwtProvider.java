@@ -1,5 +1,6 @@
 package com.fundy.FundyBE.global.component.jwt;
 
+import com.fundy.FundyBE.global.config.redis.refreshInfo.RefreshInfo;
 import com.fundy.FundyBE.global.exception.customException.NoAuthorityException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.security.Key;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -77,13 +79,27 @@ public class JwtProvider {
     }
 
     public TokenInfo generateToken(Authentication authentication) {
-        List<String> authorities = authentication.getAuthorities().stream()
+        return buildTokenInfo(
+                parseAuthorities(authentication.getAuthorities()),
+                authentication.getName());
+    }
+
+    public TokenInfo generateTokenWithRefreshInfo(RefreshInfo refreshInfo) {
+        return buildTokenInfo(
+                parseAuthorities(refreshInfo.getAuthorities()),
+                refreshInfo.getId());
+    }
+
+    private List<String> parseAuthorities(Collection<? extends GrantedAuthority> authorities) {
+        return authorities.stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
+    }
 
+    private TokenInfo buildTokenInfo(List<String> authorities, String subject) {
         Date now = new Date();
         String accessToken = Jwts.builder()
-                .setSubject(authentication.getName())
+                .setSubject(subject)
                 .claim(AUTH_CLAIM_NAME, authorities)
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + ACCESS_DURATION))
@@ -148,15 +164,15 @@ public class JwtProvider {
 
     private Key currentKey(TokenType tokenType) {
         if(tokenType.equals(TokenType.EMAIL)) {
-            return this.emailKey;
+            return emailKey;
         }
 
         if(tokenType.equals(TokenType.ACCESS)) {
-            return this.accessKey;
+            return accessKey;
         }
 
         if(tokenType.equals(TokenType.REFRESH)) {
-            return this.refreshKey;
+            return refreshKey;
         }
 
         return null;
