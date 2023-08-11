@@ -1,6 +1,7 @@
 package com.fundy.FundyBE.global.config.security.filter;
 
 import com.fundy.FundyBE.global.component.jwt.JwtProvider;
+import com.fundy.FundyBE.global.component.jwt.TokenType;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.GenericFilter;
 import jakarta.servlet.ServletException;
@@ -27,7 +28,7 @@ public class JwtAuthenticationFilter extends GenericFilter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         log.debug("JwtAuthenticationFilter work");
         String token = jwtProvider.resolveToken((HttpServletRequest) request);
-        if(token != null && jwtProvider.isVerifyToken(token)) {
+        if(token != null && jwtProvider.isVerifyToken(token, TokenType.ACCESS)) {
             Authentication authentication = jwtProvider.getAuthentication(token);
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }

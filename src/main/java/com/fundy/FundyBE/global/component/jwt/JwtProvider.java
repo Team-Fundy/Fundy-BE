@@ -29,29 +29,43 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 public class JwtProvider {
-    private final Key key;
     private final String AUTH_CLAIM_NAME = "auth";
     private final String CODE_CLAIM_NAME = "code";
 
-    public JwtProvider(@Value("${jwt.secret}") String secretKey) {
+    private final long ACCESS_DURATION = 2 * 60 * 60 * 1000L; // 2시간
+    private final long REFRESH_DURATION = 30 * 24 * 60 * 60 * 1000L; // 30일
+    private final long EMAIL_DURATION = 3 * 60 * 1000L; // 3분
+
+    private final Key emailKey;
+    private final Key accessKey;
+    private final Key refreshKey;
+
+    public JwtProvider(@Value("${jwt.secret.email}") String secretEmailKey,
+                       @Value("${jwt.secret.access}") String secretAccessKey,
+                       @Value("${jwt.secret.refresh}") String secretRefreshKey) {
+         this.emailKey = parseKey(secretEmailKey);
+         this.accessKey = parseKey(secretAccessKey);
+         this.refreshKey = parseKey(secretRefreshKey);
+    }
+
+    private Key parseKey(String secretKey) {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
-        this.key = Keys.hmacShaKeyFor(keyBytes);
+        return Keys.hmacShaKeyFor(keyBytes);
     }
 
     public String generateEmailVerifyToken(String email, String verifyCode) {
         Date now = new Date();
-        final long tokenValidTime = 3 * 60 * 1000L; // 3분
         return Jwts.builder()
                 .setSubject(email)
                 .claim(CODE_CLAIM_NAME, verifyCode)
                 .setIssuedAt(now)
-                .setExpiration(new Date(now.getTime() + tokenValidTime))
-                .signWith(key, SignatureAlgorithm.HS256)
+                .setExpiration(new Date(now.getTime() + EMAIL_DURATION))
+                .signWith(emailKey, SignatureAlgorithm.HS256)
                 .compact();
     }
 
     public boolean isVerifyEmailTokenWithCode(String token, String email, String code) {
-        Claims claims = parseClaims(token);
+        Claims claims = parseClaims(token, TokenType.EMAIL);
         String tokenEmail = claims.getSubject();
         String tokenCode = claims.get(CODE_CLAIM_NAME).toString();
 
@@ -68,19 +82,17 @@ public class JwtProvider {
                 .collect(Collectors.toList());
 
         Date now = new Date();
-        final long tokenValidTime = 30 * 60 * 1000L; // 30분 초 밀리세컨드
         String accessToken = Jwts.builder()
                 .setSubject(authentication.getName())
                 .claim(AUTH_CLAIM_NAME, authorities)
                 .setIssuedAt(now)
-                .setExpiration(new Date(now.getTime() + tokenValidTime))
-                .signWith(key, SignatureAlgorithm.HS256)
+                .setExpiration(new Date(now.getTime() + ACCESS_DURATION))
+                .signWith(accessKey, SignatureAlgorithm.HS256)
                 .compact();
 
-        final long refreshTokenValidTime = 24 * 60 * 60 * 1000L; // 24시간 분 초 밀리세컨드
         String refreshToken = Jwts.builder()
-                .setExpiration(new Date(now.getTime() + refreshTokenValidTime))
-                .signWith(key, SignatureAlgorithm.HS256)
+                .setExpiration(new Date(now.getTime() + REFRESH_DURATION))
+                .signWith(refreshKey, SignatureAlgorithm.HS256)
                 .compact();
 
         return TokenInfo.builder()
@@ -90,13 +102,13 @@ public class JwtProvider {
     }
 
     public Authentication getAuthentication(String accessToken) {
-        Claims claims = parseClaims(accessToken);
+        Claims claims = parseClaims(accessToken, TokenType.ACCESS);
 
         if(claims.get(AUTH_CLAIM_NAME) == null) {
             NoAuthorityException.createBasic();
         }
 
-        List<GrantedAuthority> authorities = ((List<String>) claims.get("auth")).stream()
+        List<GrantedAuthority> authorities = ((List<String>) claims.get(AUTH_CLAIM_NAME)).stream()
                 .map(SimpleGrantedAuthority::new).collect(Collectors.toList());
         UserDetails principal = new User(
                 claims.getSubject(),
@@ -106,9 +118,9 @@ public class JwtProvider {
         return new UsernamePasswordAuthenticationToken(principal, "", authorities);
     }
 
-    public boolean isVerifyToken(String token) {
+    public boolean isVerifyToken(String token, TokenType tokenType) {
         try {
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            Jwts.parserBuilder().setSigningKey(currentKey(tokenType)).build().parseClaimsJws(token);
             return true;
         } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
             log.info("Invalid JWT Token", e);
@@ -122,16 +134,32 @@ public class JwtProvider {
         return false;
     }
 
-    private Claims parseClaims(String accessToken) {
+    private Claims parseClaims(String accessToken, TokenType tokenType) {
         try {
             return Jwts.parserBuilder()
-                    .setSigningKey(key)
+                    .setSigningKey(currentKey(tokenType))
                     .build()
                     .parseClaimsJws(accessToken)
                     .getBody();
         } catch (ExpiredJwtException e) {
             return e.getClaims(); // Expired된 Jwt 던짐
         }
+    }
+
+    private Key currentKey(TokenType tokenType) {
+        if(tokenType.equals(TokenType.EMAIL)) {
+            return this.emailKey;
+        }
+
+        if(tokenType.equals(TokenType.ACCESS)) {
+            return this.accessKey;
+        }
+
+        if(tokenType.equals(TokenType.REFRESH)) {
+            return this.refreshKey;
+        }
+
+        return null;
     }
 
     public String resolveToken(HttpServletRequest request) {
