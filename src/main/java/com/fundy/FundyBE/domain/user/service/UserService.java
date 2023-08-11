@@ -56,6 +56,7 @@ public class UserService {
                 .email(fundyUser.getEmail())
                 .nickname(fundyUser.getNickname())
                 .profileImage(fundyUser.getProfileImage())
+                .role(fundyUser.getRole().getValue())
                 .build();
     }
 
@@ -67,6 +68,7 @@ public class UserService {
                 .email(fundyUser.getEmail())
                 .nickname(fundyUser.getNickname())
                 .profileImage(fundyUser.getProfileImage())
+                .role(fundyUser.getRole().getValue())
                 .build();
     }
 

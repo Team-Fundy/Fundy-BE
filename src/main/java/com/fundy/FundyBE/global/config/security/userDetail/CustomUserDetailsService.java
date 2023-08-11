@@ -1,4 +1,4 @@
-package com.fundy.FundyBE.domain.user.service;
+package com.fundy.FundyBE.global.config.security.userDetail;
 
 import com.fundy.FundyBE.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -11,9 +11,10 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
     private final UserRepository userRepository;
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findByEmail(username).orElseThrow(
-                () -> new UsernameNotFoundException("id not found: " + username));
+        return CustomUserDetails.of(userRepository.findByEmail(username).orElseThrow(() ->
+                new UsernameNotFoundException("Username Not Found: " + username)));
     }
 }

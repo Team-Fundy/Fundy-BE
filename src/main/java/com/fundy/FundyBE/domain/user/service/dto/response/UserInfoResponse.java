@@ -21,4 +21,6 @@ public class UserInfoResponse {
     private String nickname;
     @Schema(description = "프로필 이미 URL", example = "http://이미지 주소")
     private String profileImage;
+    @Schema(description = "유저 권한", example = "NORMAL_USER")
+    private String role;
 }
