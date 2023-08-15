@@ -46,6 +46,7 @@ public class UserService {
     private final AsyncEmailSender emailSender;
     private final RefreshInfoRedisRepository refreshInfoRedisRepository;
 
+    @Transactional
     public UserInfoResponse emailSignUp(@Valid final SignUpServiceRequest signUpServiceRequest) {
         userValidator.hasDuplicateEmail(signUpServiceRequest.getEmail());
         userValidator.hasDuplicateNickname(signUpServiceRequest.getNickname());
