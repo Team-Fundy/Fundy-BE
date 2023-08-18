@@ -19,6 +19,7 @@ import com.fundy.FundyBE.global.config.redis.logoutInfo.LogoutInfo;
 import com.fundy.FundyBE.global.config.redis.logoutInfo.LogoutInfoRedisRepository;
 import com.fundy.FundyBE.global.config.redis.refreshInfo.RefreshInfo;
 import com.fundy.FundyBE.global.config.redis.refreshInfo.RefreshInfoRedisRepository;
+import com.fundy.FundyBE.global.exception.customException.AuthTypeMismatchException;
 import com.fundy.FundyBE.global.exception.customException.DuplicateUserException;
 import com.fundy.FundyBE.global.exception.customException.NoUserException;
 import com.fundy.FundyBE.global.exception.customException.RefreshTokenException;
@@ -92,7 +93,10 @@ public class UserService {
 
     @Transactional
     public TokenInfo login(@Valid final LoginServiceRequest loginServiceRequest) {
-        // TODO: 다른 프로바이더 로그인 안되게 막기
+        if(!findByEmail(loginServiceRequest.getEmail()).getAuthProvider().equals(AuthType.EMAIL)) {
+            throw AuthTypeMismatchException.createBasic();
+        }
+
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
           loginServiceRequest.getEmail(),
           loginServiceRequest.getPassword()

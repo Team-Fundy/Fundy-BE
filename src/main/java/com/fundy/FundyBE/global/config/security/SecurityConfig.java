@@ -10,8 +10,8 @@ import com.fundy.FundyBE.global.config.redis.logoutInfo.LogoutInfoRedisRepositor
 import com.fundy.FundyBE.global.config.redis.refreshInfo.RefreshInfo;
 import com.fundy.FundyBE.global.config.redis.refreshInfo.RefreshInfoRedisRepository;
 import com.fundy.FundyBE.global.config.security.filter.JwtAuthenticationFilter;
-import com.fundy.FundyBE.global.config.security.oauth2.exception.AuthTypeMismatchOAuth2Exception;
 import com.fundy.FundyBE.global.config.security.oauth2.CustomOauth2UserService;
+import com.fundy.FundyBE.global.config.security.oauth2.exception.AuthTypeMismatchOAuth2Exception;
 import com.fundy.FundyBE.global.config.security.userDetail.CustomUserDetails;
 import com.fundy.FundyBE.global.exception.response.ExceptionResponse;
 import com.fundy.FundyBE.global.exception.response.JwtExceptionResponse;
@@ -227,7 +227,6 @@ public class SecurityConfig {
     private AuthenticationFailureHandler getAuthenticationFailureHandler() {
         return (request, response, exception) -> {
             String targetUrl;
-            exception.printStackTrace();
             if(exception instanceof AuthTypeMismatchOAuth2Exception) {
                 targetUrl = UriComponentsBuilder.fromUriString(OAUTH2_CLIENT_PATH + "/fail/email")
                         .toUriString();

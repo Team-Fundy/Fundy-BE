@@ -4,6 +4,7 @@ import com.fundy.FundyBE.domain.user.repository.AuthType;
 import com.fundy.FundyBE.domain.user.repository.FundyRole;
 import com.fundy.FundyBE.domain.user.repository.FundyUser;
 import com.fundy.FundyBE.domain.user.repository.UserRepository;
+import com.fundy.FundyBE.global.config.security.oauth2.exception.AuthTypeMismatchOAuth2Exception;
 import com.fundy.FundyBE.global.config.security.oauth2.userInfo.OAuth2UserInfo;
 import com.fundy.FundyBE.global.config.security.oauth2.userInfo.OAuth2UserInfoFactory;
 import com.fundy.FundyBE.global.config.security.userDetail.CustomUserDetails;
@@ -57,7 +58,7 @@ public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequ
         }
 
         if(fundyUser.getAuthType() != oAuth2UserInfo.getAuthType()) {
-            throw new RuntimeException("User Already Signed Up, Different Provider");
+            throw AuthTypeMismatchOAuth2Exception.createBasic();
         }
 
         return fundyUser;
