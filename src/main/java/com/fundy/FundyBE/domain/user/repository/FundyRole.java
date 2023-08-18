@@ -3,7 +3,8 @@ package com.fundy.FundyBE.domain.user.repository;
 public enum FundyRole {
     NORMAL_USER("NORMAL_USER"),
     CREATOR("CREATOR"),
-    ADMIN("ADMIN");
+    ADMIN("ADMIN"),
+    GUEST("GUEST");
 
     private String value;
 

@@ -1,5 +1,6 @@
 package com.fundy.FundyBE.domain.user.service;
 
+import com.fundy.FundyBE.domain.user.repository.AuthType;
 import com.fundy.FundyBE.domain.user.repository.FundyRole;
 import com.fundy.FundyBE.domain.user.repository.FundyUser;
 import com.fundy.FundyBE.domain.user.repository.UserRepository;
@@ -59,6 +60,7 @@ public class UserService {
                 .profileImage(
                         useBasicImageIsNull(signUpServiceRequest.getProfileImage()))
                 .role(FundyRole.NORMAL_USER)
+                .authType(AuthType.EMAIL)
                 .build());
 
         return UserInfoResponse.builder()
@@ -67,6 +69,7 @@ public class UserService {
                 .nickname(fundyUser.getNickname())
                 .profileImage(fundyUser.getProfileImage())
                 .role(fundyUser.getRole().getValue())
+                .authProvider(fundyUser.getAuthType().getValue())
                 .build();
     }
 
@@ -79,6 +82,7 @@ public class UserService {
                 .nickname(fundyUser.getNickname())
                 .profileImage(fundyUser.getProfileImage())
                 .role(fundyUser.getRole().getValue())
+                .authProvider(fundyUser.getAuthType().getValue())
                 .build();
     }
 

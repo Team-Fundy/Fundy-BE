@@ -1,5 +1,6 @@
 package com.fundy.FundyBE.global.component.jwt;
 
+import com.fundy.FundyBE.domain.user.repository.FundyRole;
 import com.fundy.FundyBE.global.config.redis.refreshInfo.RefreshInfo;
 import com.fundy.FundyBE.global.exception.customException.NoAuthorityException;
 import io.jsonwebtoken.Claims;
@@ -24,6 +25,7 @@ import org.springframework.util.StringUtils;
 
 import java.security.Key;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -82,6 +84,12 @@ public class JwtProvider {
         return buildTokenInfo(
                 parseAuthorities(authentication.getAuthorities()),
                 authentication.getName());
+    }
+
+    public TokenInfo generateToken(String email, FundyRole role) {
+        return buildTokenInfo(
+                Collections.singletonList(role.getValue()).stream().toList(),
+                email);
     }
 
     public TokenInfo generateTokenWithRefreshInfo(RefreshInfo refreshInfo) {

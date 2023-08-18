@@ -18,6 +18,10 @@ public class RoleAttributeConverter implements AttributeConverter<FundyRole, Int
         if(attribute.equals(FundyRole.ADMIN)) {
             return 2;
         }
+
+        if(attribute.equals(FundyRole.GUEST)) {
+            return 3;
+        }
         return null;
     }
 
@@ -34,6 +38,11 @@ public class RoleAttributeConverter implements AttributeConverter<FundyRole, Int
         if(dbData == 2) {
             return FundyRole.ADMIN;
         }
+
+        if(dbData == 3) {
+            return FundyRole.GUEST;
+        }
+
         return null;
     }
 }

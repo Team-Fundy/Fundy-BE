@@ -23,4 +23,6 @@ public class UserInfoResponse {
     private String profileImage;
     @Schema(description = "유저 권한", example = "NORMAL_USER")
     private String role;
+    @Schema(description = "유저 가입 방식", example = "EMAIL")
+    private String authProvider;
 }

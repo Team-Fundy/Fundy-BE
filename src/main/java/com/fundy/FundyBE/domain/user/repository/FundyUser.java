@@ -24,7 +24,7 @@ public class FundyUser {
 
     @Column(name = "NICKNAME", nullable = false, unique = true)
     private String nickname;
-    @Column(name = "PASSWORD", nullable = false)
+    @Column(name = "PASSWORD")
     private String password;
     @Column(name = "EMAIL", nullable = false, unique = true)
     private String email;
@@ -35,13 +35,18 @@ public class FundyUser {
     @Column(name = "ROLE", nullable = false)
     private FundyRole role;
 
+    @Convert(converter = AuthTypeAttributeConverter.class)
+    @Column(name = "AUTH_TYPE", nullable = false)
+    private AuthType authType;
+
     @Builder
-    private FundyUser(String nickname, String password, String email, String profileImage, FundyRole role) {
+    private FundyUser(String nickname, String password, String email, String profileImage, FundyRole role, AuthType authType) {
         this.nickname = nickname;
         this.password = password;
         this.email = email;
         this.profileImage = profileImage;
         this.role = role;
+        this.authType = authType;
     }
 
     public UUID getId() {
@@ -64,5 +69,13 @@ public class FundyUser {
 
     public FundyRole getRole() {
         return role;
+    }
+
+    public AuthType getAuthType() {
+        return authType;
+    }
+
+    public void setRole(FundyRole role) {
+        this.role = role;
     }
 }

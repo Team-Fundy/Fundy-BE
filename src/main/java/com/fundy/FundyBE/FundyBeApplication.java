@@ -9,6 +9,5 @@ public class FundyBeApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(FundyBeApplication.class, args);
 	}
-	//TODO: Oauth2 구현
-	//TODO: Refresh Token 사용
+	//TODO: 다른 Oauth2 프로바이더 구축
 }
