@@ -2,6 +2,7 @@ package com.fundy.FundyBE.global.config.security.filter;
 
 import com.fundy.FundyBE.global.component.jwt.JwtProvider;
 import com.fundy.FundyBE.global.component.jwt.TokenType;
+import com.fundy.FundyBE.global.config.redis.logoutInfo.LogoutInfoRedisRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.GenericFilter;
 import jakarta.servlet.ServletException;
@@ -19,16 +20,18 @@ import java.io.IOException;
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class JwtAuthenticationFilter extends GenericFilter {
     private final JwtProvider jwtProvider;
+    private final LogoutInfoRedisRepository logoutInfoRedisRepository;
 
-    public static JwtAuthenticationFilter newInstance(JwtProvider jwtProvider) {
-        return new JwtAuthenticationFilter(jwtProvider);
+    public static JwtAuthenticationFilter newInstance(JwtProvider jwtProvider, LogoutInfoRedisRepository logoutInfoRedisRepository) {
+        return new JwtAuthenticationFilter(jwtProvider, logoutInfoRedisRepository);
     }
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         String token = jwtProvider.resolveToken((HttpServletRequest) request);
         if(!((HttpServletRequest) request).getRequestURI().equals("/api/user/reissue")) {
-            if(token != null && jwtProvider.isVerifyToken(token, TokenType.ACCESS)) {
+            if(token != null && jwtProvider.isVerifyToken(token, TokenType.ACCESS)
+            && logoutInfoRedisRepository.findByAccessToken(token).isEmpty()) {
                 Authentication authentication = jwtProvider.getAuthentication(token);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }

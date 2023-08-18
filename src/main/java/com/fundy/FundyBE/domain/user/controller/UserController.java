@@ -173,4 +173,22 @@ public class UserController {
                 .result(userService.reissueToken(request))
                 .build();
     }
+    @Operation(summary = "로그아웃", description = "로그아웃",
+            security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공",
+                    useReturnTypeSchema = true),
+            @ApiResponse(responseCode = "400", description = "에러 발생",
+                    content = @Content(schema = @Schema(implementation = ExceptionResponse.class))),
+            @ApiResponse(responseCode = "403", description = "토큰 이상",
+                    content = @Content(schema = @Schema(implementation = JwtExceptionResponse.class)))
+    })
+    @PostMapping("/logout")
+    GlobalResponse<Boolean> logout(HttpServletRequest request) {
+        userService.logout(request);
+        return GlobalResponse.<Boolean>builder()
+                .message("로그아웃 성공")
+                .result(true)
+                .build();
+    }
 }

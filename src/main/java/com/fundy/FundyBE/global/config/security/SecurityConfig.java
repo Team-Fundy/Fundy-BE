@@ -6,6 +6,7 @@ import com.fundy.FundyBE.domain.user.repository.FundyUser;
 import com.fundy.FundyBE.domain.user.repository.UserRepository;
 import com.fundy.FundyBE.global.component.jwt.JwtProvider;
 import com.fundy.FundyBE.global.component.jwt.TokenInfo;
+import com.fundy.FundyBE.global.config.redis.logoutInfo.LogoutInfoRedisRepository;
 import com.fundy.FundyBE.global.config.redis.refreshInfo.RefreshInfo;
 import com.fundy.FundyBE.global.config.redis.refreshInfo.RefreshInfoRedisRepository;
 import com.fundy.FundyBE.global.config.security.filter.JwtAuthenticationFilter;
@@ -54,6 +55,7 @@ public class SecurityConfig {
     private final CustomOauth2UserService customOauth2UserService;
     private final RefreshInfoRedisRepository refreshInfoRedisRepository;
     private final UserRepository userRepository;
+    private final LogoutInfoRedisRepository logoutInfoRedisRepository;
     private final String OAUTH2_CLIENT_PATH = "http://localhost:3000/oauth2";
 
     @Bean
@@ -65,12 +67,13 @@ public class SecurityConfig {
                 .sessionManagement((sessionManagement) ->
                         sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(
-                        JwtAuthenticationFilter.newInstance(jwtProvider),
+                        JwtAuthenticationFilter.newInstance(jwtProvider, logoutInfoRedisRepository),
                         UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests((auth) -> {
                     auth
                             .requestMatchers(
-                                    "/user/info").authenticated()
+                                    "/user/info",
+                                    "/user/logout").authenticated()
                             .anyRequest().permitAll();
                 })
                 .exceptionHandling((exceptionHandler) -> {
@@ -108,6 +111,14 @@ public class SecurityConfig {
                 return;
             }
 
+            if(request.getRequestURI().equals("/api/user/logout")) {
+                response.setStatus(HttpStatus.FORBIDDEN.value());
+                response.getWriter().write(objectMapper.writeValueAsString(ExceptionResponse.builder()
+                        .message("로그아웃에 실패하였습니다")
+                        .build()));
+                return;
+            }
+
             // 토큰 문제
             response.setStatus(HttpStatus.FORBIDDEN.value());
             response.getWriter().write(objectMapper.writeValueAsString(getJwtExceptionResponse(request)));
@@ -116,7 +127,15 @@ public class SecurityConfig {
 
     private JwtExceptionResponse getJwtExceptionResponse(HttpServletRequest request) {
         String token = jwtProvider.resolveToken(request);
-        if(token!=null && jwtProvider.canRefresh(token)) {
+        if (token!=null && jwtProvider.canRefresh(token)) {
+            if (logoutInfoRedisRepository.findByAccessToken(token).isPresent()) {
+                return JwtExceptionResponse.builder()
+                        .success(false)
+                        .message("로그아웃 상태")
+                        .canRefresh(false)
+                        .build();
+            }
+
             return JwtExceptionResponse.builder()
                     .success(false)
                     .message("토큰 만료")

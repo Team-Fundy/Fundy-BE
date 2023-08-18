@@ -15,6 +15,8 @@ import com.fundy.FundyBE.global.component.email.AsyncEmailSender;
 import com.fundy.FundyBE.global.component.jwt.JwtProvider;
 import com.fundy.FundyBE.global.component.jwt.TokenInfo;
 import com.fundy.FundyBE.global.component.jwt.TokenType;
+import com.fundy.FundyBE.global.config.redis.logoutInfo.LogoutInfo;
+import com.fundy.FundyBE.global.config.redis.logoutInfo.LogoutInfoRedisRepository;
 import com.fundy.FundyBE.global.config.redis.refreshInfo.RefreshInfo;
 import com.fundy.FundyBE.global.config.redis.refreshInfo.RefreshInfoRedisRepository;
 import com.fundy.FundyBE.global.exception.customException.DuplicateUserException;
@@ -28,6 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,6 +49,7 @@ public class UserService {
     private final JwtProvider jwtProvider;
     private final AsyncEmailSender emailSender;
     private final RefreshInfoRedisRepository refreshInfoRedisRepository;
+    private final LogoutInfoRedisRepository logoutInfoRedisRepository;
 
     @Transactional
     public UserInfoResponse emailSignUp(@Valid final SignUpServiceRequest signUpServiceRequest) {
@@ -88,6 +92,7 @@ public class UserService {
 
     @Transactional
     public TokenInfo login(@Valid final LoginServiceRequest loginServiceRequest) {
+        // TODO: 다른 프로바이더 로그인 안되게 막기
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
           loginServiceRequest.getEmail(),
           loginServiceRequest.getPassword()
@@ -116,6 +121,28 @@ public class UserService {
         refreshInfoRedisRepository.save(refreshInfo);
 
         return tokenInfo;
+    }
+
+    @Transactional
+    public void logout(HttpServletRequest request) {
+        // accessToken 유효성 검사는 Filter에서 진웃
+        String accessToken = jwtProvider.resolveToken(request);
+
+        Authentication authentication = jwtProvider.getAuthentication(accessToken);
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        logoutInfoRedisRepository.save(LogoutInfo.builder()
+                        .accessToken(accessToken)
+                        .email(userDetails.getUsername())
+                .build());
+
+        refreshInfoRedisRepository.deleteById(userDetails.getUsername());
+        // 로그아웃 절차
+        // 1. 로그아웃 시도
+        // 2. 토큰 유효성 검사
+        // 3. 액세스토큰 블랙리스트 등록
+        // 4. 리프레쉬토큰 삭제
+        // 5. 정상적인 작동
+        // 6. 블랙리스트 액세스토큰 검사
     }
 
     public EmailCodeResponse sendEmailCodeAndReturnToken(String email){
