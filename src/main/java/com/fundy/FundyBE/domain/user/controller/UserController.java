@@ -13,6 +13,7 @@ import com.fundy.FundyBE.domain.user.service.dto.response.EmailCodeResponse;
 import com.fundy.FundyBE.domain.user.service.dto.response.UserInfoResponse;
 import com.fundy.FundyBE.domain.user.service.dto.response.VerifyEmailResponse;
 import com.fundy.FundyBE.global.component.jwt.TokenInfo;
+import com.fundy.FundyBE.global.component.s3.S3Uploader;
 import com.fundy.FundyBE.global.exception.response.ExceptionResponse;
 import com.fundy.FundyBE.global.exception.response.JwtExceptionResponse;
 import com.fundy.FundyBE.global.response.GlobalResponse;
@@ -28,12 +29,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.security.Principal;
 
@@ -44,6 +47,7 @@ import java.security.Principal;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
+    private final S3Uploader s3Uploader;
     @Operation(summary = "이메일 회원가입", description = "유저가 이메일로 회원가입 시도")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "성공",
@@ -189,6 +193,20 @@ public class UserController {
         return GlobalResponse.<Boolean>builder()
                 .message("로그아웃 성공")
                 .result(true)
+                .build();
+    }
+
+    @Operation(summary = "유저 프로필 이미지 업로드", description = "유저 프로필 이미지 업로드")
+    @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
+    @ApiResponse(responseCode = "400", description = "에러 발생",
+        content = @Content(schema = @Schema(implementation = ExceptionResponse.class)))
+    @ApiResponse(responseCode = "413", description = "파일 크기 에러",
+            content = @Content(schema = @Schema(implementation = ExceptionResponse.class)))
+    @PostMapping(value = "/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    GlobalResponse<String> uploadProfileImage(@RequestParam("file")MultipartFile multipartFile) {
+        return GlobalResponse.<String>builder()
+                .message("이미지 업로드 성공")
+                .result(s3Uploader.uploadProfileImage(multipartFile))
                 .build();
     }
 }

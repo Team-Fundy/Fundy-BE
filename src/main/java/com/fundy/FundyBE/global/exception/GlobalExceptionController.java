@@ -5,9 +5,11 @@ import com.fundy.FundyBE.global.exception.customException.DuplicateUserException
 import com.fundy.FundyBE.global.exception.customException.NoAuthorityException;
 import com.fundy.FundyBE.global.exception.customException.NoUserException;
 import com.fundy.FundyBE.global.exception.customException.RefreshTokenException;
+import com.fundy.FundyBE.global.exception.customException.S3UploadException;
 import com.fundy.FundyBE.global.exception.response.ExceptionResponse;
 import io.swagger.v3.oas.annotations.Hidden;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.http.fileupload.impl.SizeLimitExceededException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -63,7 +65,21 @@ public class GlobalExceptionController {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
     public final ExceptionResponse handleAuthTypeMismatchException(final AuthTypeMismatchException e) {
-        return makeResponse(e.getMessage()); // e.getMessage가 null로 적용됨
+        return makeResponse(e.getMessage());
+    }
+
+    @ExceptionHandler({SizeLimitExceededException.class})
+    @ResponseStatus(HttpStatus.PAYLOAD_TOO_LARGE)
+    @ResponseBody
+    public final ExceptionResponse handleSizeLimitExceededException(final SizeLimitExceededException e) {
+        return makeResponse("파일의 사이즈가 너무 큽니다");
+    }
+
+    @ExceptionHandler({S3UploadException.class})
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    public final ExceptionResponse handleS3UploadException(final S3UploadException e) {
+        return makeResponse(e.getMessage());
     }
 
     private ExceptionResponse makeResponse(String message) {
