@@ -22,7 +22,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -49,12 +48,10 @@ public class UserController {
     private final UserService userService;
     private final S3Uploader s3Uploader;
     @Operation(summary = "이메일 회원가입", description = "유저가 이메일로 회원가입 시도")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "성공",
-                    useReturnTypeSchema = true),
-            @ApiResponse(responseCode = "400", description = "에러 발생",
-                    content = @Content(schema = @Schema(implementation = ExceptionResponse.class)))
-    })
+    @ApiResponse(responseCode = "200", description = "성공",
+            useReturnTypeSchema = true)
+    @ApiResponse(responseCode = "400", description = "에러 발생",
+            content = @Content(schema = @Schema(implementation = ExceptionResponse.class)))
     @PostMapping("/sign-up")
     public GlobalResponse<UserInfoResponse> emailSignUp(@RequestBody @Valid final SignUpRequest signUpRequest) {
         UserInfoResponse result = userService.emailSignUp(SignUpServiceRequest.builder()
@@ -72,14 +69,12 @@ public class UserController {
 
 
     @Operation(summary = "이메일로 로그인", description = "유저가 이메일로 로그인 시도")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "성공",
-                    useReturnTypeSchema = true),
-            @ApiResponse(responseCode = "400", description = "에러 발생",
-                    content = @Content(schema = @Schema(implementation = ExceptionResponse.class))),
-            @ApiResponse(responseCode = "401", description = "로그인 에러",
-                    content = @Content(schema = @Schema(implementation = ExceptionResponse.class))),
-    })
+    @ApiResponse(responseCode = "200", description = "성공",
+            useReturnTypeSchema = true)
+    @ApiResponse(responseCode = "400", description = "에러 발생",
+            content = @Content(schema = @Schema(implementation = ExceptionResponse.class)))
+    @ApiResponse(responseCode = "401", description = "로그인 에러",
+            content = @Content(schema = @Schema(implementation = ExceptionResponse.class)))
     @PostMapping("/login")
     public GlobalResponse<TokenInfo> login(@RequestBody @Valid final LoginRequest loginRequest) {
         TokenInfo tokenInfo = userService.login(LoginServiceRequest.builder()
@@ -93,14 +88,12 @@ public class UserController {
 
     @Operation(summary = "유저 정보 조회", description = "토큰으로 유저 정보 조회",
         security = @SecurityRequirement(name = "bearerAuth"))
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "성공",
-                    useReturnTypeSchema = true),
-            @ApiResponse(responseCode = "400", description = "에러 발생",
-                    content = @Content(schema = @Schema(implementation = ExceptionResponse.class))),
-            @ApiResponse(responseCode = "403", description = "토큰 이상",
-                    content = @Content(schema = @Schema(implementation = JwtExceptionResponse.class)))
-    })
+    @ApiResponse(responseCode = "200", description = "성공",
+            useReturnTypeSchema = true)
+    @ApiResponse(responseCode = "400", description = "에러 발생",
+            content = @Content(schema = @Schema(implementation = ExceptionResponse.class)))
+    @ApiResponse(responseCode = "403", description = "토큰 이상",
+            content = @Content(schema = @Schema(implementation = JwtExceptionResponse.class)))
     @GetMapping("/info")
     public GlobalResponse<UserInfoResponse> getUserInfo(Principal principal) {
         return GlobalResponse.<UserInfoResponse>builder()
@@ -110,12 +103,10 @@ public class UserController {
     }
 
     @Operation(summary = "이메일 인증 코드", description = "유저 이메일 인증 코드 6자리 발송")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "성공",
-                    useReturnTypeSchema = true),
-            @ApiResponse(responseCode = "400", description = "에러 발생",
-                    content = @Content(schema = @Schema(implementation = ExceptionResponse.class)))
-    })
+    @ApiResponse(responseCode = "200", description = "성공",
+            useReturnTypeSchema = true)
+    @ApiResponse(responseCode = "400", description = "에러 발생",
+            content = @Content(schema = @Schema(implementation = ExceptionResponse.class)))
     @PostMapping("/email/code")
     public GlobalResponse<EmailCodeResponse> sendEmailCode(@RequestBody @Valid final EmailCodeRequest emailCodeRequest) {
         return GlobalResponse.<EmailCodeResponse>builder()
@@ -124,12 +115,10 @@ public class UserController {
                 .build();
     }
     @Operation(summary = "이메일 인증", description = "유저 이메일 인증")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "성공",
-                    useReturnTypeSchema = true),
-            @ApiResponse(responseCode = "400", description = "에러 발생",
-                    content = @Content(schema = @Schema(implementation = ExceptionResponse.class)))
-    })
+    @ApiResponse(responseCode = "200", description = "성공",
+            useReturnTypeSchema = true)
+    @ApiResponse(responseCode = "400", description = "에러 발생",
+            content = @Content(schema = @Schema(implementation = ExceptionResponse.class)))
     @PostMapping("/email/verify")
     public GlobalResponse<VerifyEmailResponse> verifyEmail(@RequestBody @Valid final VerifyEmailRequest verifyEmailRequest) {
         return GlobalResponse.<VerifyEmailResponse>builder()
@@ -144,12 +133,10 @@ public class UserController {
     }
 
     @Operation(summary = "닉네임 중복 검사", description = "유저 닉네임 중복 검사")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "성공",
-                    useReturnTypeSchema = true),
-            @ApiResponse(responseCode = "400", description = "에러 발생",
-                    content = @Content(schema = @Schema(implementation = ExceptionResponse.class)))
-    })
+    @ApiResponse(responseCode = "200", description = "성공",
+            useReturnTypeSchema = true)
+    @ApiResponse(responseCode = "400", description = "에러 발생",
+            content = @Content(schema = @Schema(implementation = ExceptionResponse.class)))
     @GetMapping("/check-nickname")
     public GlobalResponse<AvailableNicknameResponse> isAvailableNickname(
             @Parameter(description = "중복 검사할 닉네임", example = "유저-123")
@@ -162,14 +149,12 @@ public class UserController {
     }
     @Operation(summary = "토큰 재발급", description = "토큰 재발급",
             security = @SecurityRequirement(name = "bearerAuth"))
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "성공",
-                    useReturnTypeSchema = true),
-            @ApiResponse(responseCode = "400", description = "에러 발생",
-                    content = @Content(schema = @Schema(implementation = ExceptionResponse.class))),
-            @ApiResponse(responseCode = "403", description = "토큰 이상",
-                    content = @Content(schema = @Schema(implementation = JwtExceptionResponse.class)))
-    })
+    @ApiResponse(responseCode = "200", description = "성공",
+            useReturnTypeSchema = true)
+    @ApiResponse(responseCode = "400", description = "에러 발생",
+            content = @Content(schema = @Schema(implementation = ExceptionResponse.class)))
+    @ApiResponse(responseCode = "403", description = "토큰 이상",
+            content = @Content(schema = @Schema(implementation = JwtExceptionResponse.class)))
     @GetMapping("/reissue")
     GlobalResponse<TokenInfo> reissueToken(HttpServletRequest request) {
         return GlobalResponse.<TokenInfo>builder()
@@ -177,16 +162,15 @@ public class UserController {
                 .result(userService.reissueToken(request))
                 .build();
     }
+
     @Operation(summary = "로그아웃", description = "로그아웃",
             security = @SecurityRequirement(name = "bearerAuth"))
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "성공",
-                    useReturnTypeSchema = true),
-            @ApiResponse(responseCode = "400", description = "에러 발생",
-                    content = @Content(schema = @Schema(implementation = ExceptionResponse.class))),
-            @ApiResponse(responseCode = "403", description = "토큰 이상",
-                    content = @Content(schema = @Schema(implementation = JwtExceptionResponse.class)))
-    })
+    @ApiResponse(responseCode = "200", description = "성공",
+            useReturnTypeSchema = true)
+    @ApiResponse(responseCode = "400", description = "에러 발생",
+            content = @Content(schema = @Schema(implementation = ExceptionResponse.class)))
+    @ApiResponse(responseCode = "403", description = "토큰 이상",
+            content = @Content(schema = @Schema(implementation = JwtExceptionResponse.class)))
     @PostMapping("/logout")
     GlobalResponse<Boolean> logout(HttpServletRequest request) {
         userService.logout(request);
