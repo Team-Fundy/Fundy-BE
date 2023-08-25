@@ -140,13 +140,6 @@ public class UserService {
                 .build());
 
         refreshInfoRedisRepository.deleteById(userDetails.getUsername());
-        // 로그아웃 절차
-        // 1. 로그아웃 시도
-        // 2. 토큰 유효성 검사
-        // 3. 액세스토큰 블랙리스트 등록
-        // 4. 리프레쉬토큰 삭제
-        // 5. 정상적인 작동
-        // 6. 블랙리스트 액세스토큰 검사
     }
 
     public EmailCodeResponse sendEmailCodeAndReturnToken(String email){
