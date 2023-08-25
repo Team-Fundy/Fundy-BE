@@ -79,8 +79,7 @@ public class UserService {
     }
 
     public UserInfoResponse findByEmail(String email) {
-        FundyUser fundyUser = userRepository.findByEmail(email).orElseThrow(() ->
-                NoUserException.createBasic());
+        FundyUser fundyUser = findByEmailOrElseThrow(email);
         return UserInfoResponse.builder()
                 .id(fundyUser.getId().toString())
                 .email(fundyUser.getEmail())
@@ -222,5 +221,9 @@ public class UserService {
             randomString += characters.charAt(random.nextInt(characters.length()));
 
         return randomString;
+    }
+
+    private FundyUser findByEmailOrElseThrow(String email) {
+        return userRepository.findByEmail(email).orElseThrow(() -> NoUserException.createBasic());
     }
 }

@@ -29,6 +29,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -36,8 +38,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.security.Principal;
 
 @Slf4j
 @Tag(name = "User", description = "User 도메인 관련 API 입니다.")
@@ -95,10 +95,10 @@ public class UserController {
     @ApiResponse(responseCode = "403", description = "토큰 이상",
             content = @Content(schema = @Schema(implementation = JwtExceptionResponse.class)))
     @GetMapping("/info")
-    public GlobalResponse<UserInfoResponse> getUserInfo(Principal principal) {
+    public GlobalResponse<UserInfoResponse> getUserInfo(@AuthenticationPrincipal User user) {
         return GlobalResponse.<UserInfoResponse>builder()
                 .message("User 정보 조회")
-                .result(userService.findByEmail(principal.getName()))
+                .result(userService.findByEmail(user.getUsername()))
                 .build();
     }
 
