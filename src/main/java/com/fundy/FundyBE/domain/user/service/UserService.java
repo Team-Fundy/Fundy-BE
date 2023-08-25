@@ -92,7 +92,7 @@ public class UserService {
 
     @Transactional
     public TokenInfo login(@Valid final LoginServiceRequest loginServiceRequest) {
-        if(!findByEmail(loginServiceRequest.getEmail()).getAuthProvider().equals(AuthType.EMAIL)) {
+        if(!findByEmailOrElseThrow(loginServiceRequest.getEmail()).getAuthType().equals(AuthType.EMAIL)) {
             throw AuthTypeMismatchException.createBasic();
         }
 
