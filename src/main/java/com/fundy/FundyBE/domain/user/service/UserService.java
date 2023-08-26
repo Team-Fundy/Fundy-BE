@@ -25,7 +25,6 @@ import com.fundy.FundyBE.global.exception.customException.NoUserException;
 import com.fundy.FundyBE.global.exception.customException.RefreshTokenException;
 import com.fundy.FundyBE.global.validation.user.UserValidator;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -55,7 +54,7 @@ public class UserService {
     private final LogoutInfoRedisRepository logoutInfoRedisRepository;
 
     @Transactional
-    public UserInfoResponse emailSignUp(@Valid final SignUpServiceRequest signUpServiceRequest) {
+    public UserInfoResponse emailSignUp(final SignUpServiceRequest signUpServiceRequest) {
         userValidator.hasDuplicateEmail(signUpServiceRequest.getEmail());
         userValidator.hasDuplicateNickname(signUpServiceRequest.getNickname());
 
@@ -93,7 +92,7 @@ public class UserService {
     }
 
     @Transactional
-    public TokenInfo login(@Valid final LoginServiceRequest loginServiceRequest) {
+    public TokenInfo login(final LoginServiceRequest loginServiceRequest) {
         if(!findByEmailOrElseThrow(loginServiceRequest.getEmail()).getAuthType().equals(AuthType.EMAIL)) {
             throw AuthTypeMismatchException.createBasic();
         }
@@ -155,7 +154,7 @@ public class UserService {
                 .build();
     }
 
-    public VerifyEmailResponse verifyTokenWithEmail(@Valid final VerifyEmailCodeServiceRequest verifyEmailCodeServiceRequest) {
+    public VerifyEmailResponse verifyTokenWithEmail(final VerifyEmailCodeServiceRequest verifyEmailCodeServiceRequest) {
         return VerifyEmailResponse.builder()
                 .email(verifyEmailCodeServiceRequest.getEmail())
                 .verify(jwtProvider.isVerifyEmailTokenWithCode(
