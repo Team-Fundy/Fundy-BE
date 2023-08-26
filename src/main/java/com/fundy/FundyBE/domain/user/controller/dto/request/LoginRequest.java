@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
@@ -12,6 +13,7 @@ import org.hibernate.validator.constraints.Length;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class LoginRequest {
     @Schema(description = "이메일", example = "dongwon0103@naver.com")
     @NotNull(message = "이메일은 필수 입니다")

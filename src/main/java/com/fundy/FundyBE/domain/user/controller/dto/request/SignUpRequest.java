@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
@@ -13,6 +14,7 @@ import org.hibernate.validator.constraints.URL;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Schema(description = "사용자 회원가입 DTO")
 public class SignUpRequest {
     @NotNull(message = "이메일은 필수 입니다")
