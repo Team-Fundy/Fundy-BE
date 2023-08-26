@@ -187,24 +187,17 @@ public class UserService {
         fundyUser.setRole(FundyRole.CREATOR);
         userRepository.save(fundyUser);
 
-        logoutInfoRedisRepository.save(LogoutInfo.builder()
-                .accessToken(jwtProvider.resolveToken(request))
-                .email(email)
-                .build());
+        logout(request);
 
         TokenInfo tokenInfo = jwtProvider.generateToken(email, FundyRole.CREATOR);
-        RefreshInfo refreshInfo = refreshInfoRedisRepository.findById(email).orElse(null);
-        if(refreshInfo == null) {
-            refreshInfoRedisRepository.save(RefreshInfo.builder()
-                            .id(email)
-                            .authorities(Collections.singletonList(new SimpleGrantedAuthority(FundyRole.CREATOR.getValue())))
-                            .refreshToken(tokenInfo.getRefreshToken())
-                    .build());
-            return tokenInfo;
-        }
 
-        refreshInfo.setAuthorities(Collections.singletonList(new SimpleGrantedAuthority(FundyRole.CREATOR.getValue())));
-        refreshInfo.setRefreshToken(tokenInfo.getRefreshToken());
+        // logout(request)에서 이미 refreshInfo를 삭제함
+        refreshInfoRedisRepository.save(RefreshInfo.builder()
+                        .id(email)
+                        .authorities(Collections.singletonList(new SimpleGrantedAuthority(FundyRole.CREATOR.getValue())))
+                        .refreshToken(tokenInfo.getRefreshToken())
+                .build());
+
         return tokenInfo;
     }
 
