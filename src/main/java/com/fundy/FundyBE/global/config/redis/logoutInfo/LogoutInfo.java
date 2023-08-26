@@ -16,7 +16,7 @@ import org.springframework.data.redis.core.index.Indexed;
 @RedisHash(value = "logout", timeToLive = (2 * 60 * 60))
 public class LogoutInfo {
     @Id
-    private String id; // email -> id로 설정해야 에러 안남
+    private String id;
     @Indexed
     private String email;
     @Indexed

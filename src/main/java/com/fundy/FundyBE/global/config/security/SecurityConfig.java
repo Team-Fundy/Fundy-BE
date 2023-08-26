@@ -74,6 +74,7 @@ public class SecurityConfig {
                             .requestMatchers(
                                     "/user/info",
                                     "/user/logout").authenticated()
+                            .requestMatchers("/user/creator").hasAuthority(FundyRole.NORMAL_USER.getValue())
                             .anyRequest().permitAll();
                 })
                 .exceptionHandling((exceptionHandler) -> {

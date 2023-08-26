@@ -31,11 +31,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.Random;
 
 @Slf4j
@@ -178,6 +180,32 @@ public class UserService {
                 .nickname(nickname)
                 .available(true)
                 .build();
+    }
+    @Transactional
+    public TokenInfo transformCreator(HttpServletRequest request, String email) {
+        FundyUser fundyUser = findByEmailOrElseThrow(email);
+        fundyUser.setRole(FundyRole.CREATOR);
+        userRepository.save(fundyUser);
+
+        logoutInfoRedisRepository.save(LogoutInfo.builder()
+                .accessToken(jwtProvider.resolveToken(request))
+                .email(email)
+                .build());
+
+        TokenInfo tokenInfo = jwtProvider.generateToken(email, FundyRole.CREATOR);
+        RefreshInfo refreshInfo = refreshInfoRedisRepository.findById(email).orElse(null);
+        if(refreshInfo == null) {
+            refreshInfoRedisRepository.save(RefreshInfo.builder()
+                            .id(email)
+                            .authorities(Collections.singletonList(new SimpleGrantedAuthority(FundyRole.CREATOR.getValue())))
+                            .refreshToken(tokenInfo.getRefreshToken())
+                    .build());
+            return tokenInfo;
+        }
+
+        refreshInfo.setAuthorities(Collections.singletonList(new SimpleGrantedAuthority(FundyRole.CREATOR.getValue())));
+        refreshInfo.setRefreshToken(tokenInfo.getRefreshToken());
+        return tokenInfo;
     }
 
     private String generateNicknameIsNull(String nickname) {

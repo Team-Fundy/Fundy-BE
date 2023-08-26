@@ -33,6 +33,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -191,6 +192,16 @@ public class UserController {
         return GlobalResponse.<String>builder()
                 .message("이미지 업로드 성공")
                 .result(s3Uploader.uploadProfileImage(multipartFile))
+                .build();
+    }
+    @Operation(summary = "크레이터 전환", description = "크레에이터 전환",
+            security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
+    @PutMapping(value = "/creator")
+    GlobalResponse<TokenInfo> transformCreator(@AuthenticationPrincipal User user, HttpServletRequest request) {
+        return GlobalResponse.<TokenInfo>builder()
+                .message("크리에이터 전환 성공")
+                .result(userService.transformCreator(request, user.getUsername()))
                 .build();
     }
 }
