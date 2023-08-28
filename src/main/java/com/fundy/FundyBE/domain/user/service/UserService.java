@@ -6,11 +6,8 @@ import com.fundy.FundyBE.domain.user.repository.FundyUser;
 import com.fundy.FundyBE.domain.user.repository.UserRepository;
 import com.fundy.FundyBE.domain.user.service.dto.request.LoginServiceRequest;
 import com.fundy.FundyBE.domain.user.service.dto.request.SignUpServiceRequest;
-import com.fundy.FundyBE.domain.user.service.dto.request.VerifyEmailCodeServiceRequest;
 import com.fundy.FundyBE.domain.user.service.dto.response.AvailableNicknameResponse;
-import com.fundy.FundyBE.domain.user.service.dto.response.EmailCodeResponse;
 import com.fundy.FundyBE.domain.user.service.dto.response.UserInfoResponse;
-import com.fundy.FundyBE.domain.user.service.dto.response.VerifyEmailResponse;
 import com.fundy.FundyBE.global.component.email.AsyncEmailSender;
 import com.fundy.FundyBE.global.component.jwt.JwtProvider;
 import com.fundy.FundyBE.global.component.jwt.TokenInfo;
@@ -142,29 +139,6 @@ public class UserService {
         refreshInfoRedisRepository.deleteById(userDetails.getUsername());
     }
 
-    public EmailCodeResponse sendEmailCodeAndReturnToken(String email){
-        userValidator.hasDuplicateEmail(email);
-        String code = generateCode();
-        String token = jwtProvider.generateEmailVerifyToken(email, code);
-        emailSender.sendEmailCode(email, code);
-
-        return EmailCodeResponse.builder()
-                .email(email)
-                .token(token)
-                .build();
-    }
-
-    public VerifyEmailResponse verifyTokenWithEmail(final VerifyEmailCodeServiceRequest verifyEmailCodeServiceRequest) {
-        return VerifyEmailResponse.builder()
-                .email(verifyEmailCodeServiceRequest.getEmail())
-                .verify(jwtProvider.isVerifyEmailTokenWithCode(
-                        verifyEmailCodeServiceRequest.getToken(),
-                        verifyEmailCodeServiceRequest.getEmail(),
-                        verifyEmailCodeServiceRequest.getCode()
-                ))
-                .build();
-    }
-
     public AvailableNicknameResponse isAvailableNickname(String nickname) {
         try {
             userValidator.hasDuplicateNickname(nickname);
@@ -211,16 +185,6 @@ public class UserService {
         }
 
         return nickname;
-    }
-    private String generateCode() {
-        int codeSize = 6;
-        String code = "";
-        String numericCharacters = "0123456789";
-        Random random = new Random();
-        for(int i=0;i<codeSize;i++) {
-            code += numericCharacters.charAt(random.nextInt(numericCharacters.length()));
-        }
-        return code;
     }
 
     private String useBasicImageIsNull(String url) {

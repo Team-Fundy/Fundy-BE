@@ -34,20 +34,15 @@ import java.util.stream.Collectors;
 @Component
 public class JwtProvider {
     private final String AUTH_CLAIM_NAME = "auth";
-    private final String CODE_CLAIM_NAME = "code";
 
     private final long ACCESS_DURATION = 2 * 60 * 60 * 1000L; // 2시간
     private final long REFRESH_DURATION = 30 * 24 * 60 * 60 * 1000L; // 30일
-    private final long EMAIL_DURATION = 3 * 60 * 1000L; // 3분
 
-    private final Key emailKey;
     private final Key accessKey;
     private final Key refreshKey;
 
-    public JwtProvider(@Value("${jwt.secret.email}") String secretEmailKey,
-                       @Value("${jwt.secret.access}") String secretAccessKey,
+    public JwtProvider(@Value("${jwt.secret.access}") String secretAccessKey,
                        @Value("${jwt.secret.refresh}") String secretRefreshKey) {
-         this.emailKey = parseKey(secretEmailKey);
          this.accessKey = parseKey(secretAccessKey);
          this.refreshKey = parseKey(secretRefreshKey);
     }
@@ -55,29 +50,6 @@ public class JwtProvider {
     private Key parseKey(String secretKey) {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
-    }
-
-    public String generateEmailVerifyToken(String email, String verifyCode) {
-        Date now = new Date();
-        return Jwts.builder()
-                .setSubject(email)
-                .claim(CODE_CLAIM_NAME, verifyCode)
-                .setIssuedAt(now)
-                .setExpiration(new Date(now.getTime() + EMAIL_DURATION))
-                .signWith(emailKey, SignatureAlgorithm.HS256)
-                .compact();
-    }
-
-    public boolean isVerifyEmailTokenWithCode(String token, String email, String code) {
-        Claims claims = parseClaims(token, TokenType.EMAIL);
-        String tokenEmail = claims.getSubject();
-        String tokenCode = claims.get(CODE_CLAIM_NAME).toString();
-
-        if(email.equals(tokenEmail) && code.equals(tokenCode)) {
-            return true;
-        }
-
-        return false;
     }
 
     public TokenInfo generateToken(Authentication authentication) {
@@ -171,10 +143,6 @@ public class JwtProvider {
     }
 
     private Key currentKey(TokenType tokenType) {
-        if(tokenType.equals(TokenType.EMAIL)) {
-            return emailKey;
-        }
-
         if(tokenType.equals(TokenType.ACCESS)) {
             return accessKey;
         }

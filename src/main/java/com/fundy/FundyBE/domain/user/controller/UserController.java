@@ -4,6 +4,7 @@ import com.fundy.FundyBE.domain.user.controller.dto.request.EmailCodeRequest;
 import com.fundy.FundyBE.domain.user.controller.dto.request.LoginRequest;
 import com.fundy.FundyBE.domain.user.controller.dto.request.SignUpRequest;
 import com.fundy.FundyBE.domain.user.controller.dto.request.VerifyEmailRequest;
+import com.fundy.FundyBE.domain.user.service.EmailVerificationService;
 import com.fundy.FundyBE.domain.user.service.UserService;
 import com.fundy.FundyBE.domain.user.service.dto.request.LoginServiceRequest;
 import com.fundy.FundyBE.domain.user.service.dto.request.SignUpServiceRequest;
@@ -47,6 +48,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
+    private final EmailVerificationService emailVerificationService;
     private final S3Uploader s3Uploader;
     @Operation(summary = "이메일 회원가입", description = "유저가 이메일로 회원가입 시도")
     @ApiResponse(responseCode = "200", description = "성공",
@@ -112,7 +114,7 @@ public class UserController {
     public GlobalResponse<EmailCodeResponse> sendEmailCode(@RequestBody @Valid final EmailCodeRequest emailCodeRequest) {
         return GlobalResponse.<EmailCodeResponse>builder()
                 .message("인증코드 이메일 전송")
-                .result(userService.sendEmailCodeAndReturnToken(emailCodeRequest.getEmail()))
+                .result(emailVerificationService.sendEmailCodeAndReturnToken(emailCodeRequest.getEmail()))
                 .build();
     }
     @Operation(summary = "이메일 인증", description = "유저 이메일 인증")
@@ -124,7 +126,7 @@ public class UserController {
     public GlobalResponse<VerifyEmailResponse> verifyEmail(@RequestBody @Valid final VerifyEmailRequest verifyEmailRequest) {
         return GlobalResponse.<VerifyEmailResponse>builder()
                 .message("인증 여부 확인")
-                .result(userService.verifyTokenWithEmail(
+                .result(emailVerificationService.verifyTokenWithEmail(
                         VerifyEmailCodeServiceRequest.builder()
                                 .token(verifyEmailRequest.getToken())
                                 .email(verifyEmailRequest.getEmail())
