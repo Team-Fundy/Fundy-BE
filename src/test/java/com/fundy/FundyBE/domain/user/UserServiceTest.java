@@ -7,7 +7,7 @@ import com.fundy.FundyBE.domain.user.repository.UserRepository;
 import com.fundy.FundyBE.domain.user.service.UserService;
 import com.fundy.FundyBE.domain.user.service.dto.request.SignUpServiceRequest;
 import com.fundy.FundyBE.domain.user.service.dto.response.UserInfoResponse;
-import com.fundy.FundyBE.global.exception.customException.DuplicateUserException;
+import com.fundy.FundyBE.global.exception.customexception.DuplicateUserException;
 import com.fundy.FundyBE.global.validation.user.UserValidator;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;

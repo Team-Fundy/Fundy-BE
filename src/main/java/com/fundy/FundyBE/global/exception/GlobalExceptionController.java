@@ -1,11 +1,11 @@
 package com.fundy.FundyBE.global.exception;
 
-import com.fundy.FundyBE.global.exception.customException.AuthTypeMismatchException;
-import com.fundy.FundyBE.global.exception.customException.DuplicateUserException;
-import com.fundy.FundyBE.global.exception.customException.NoAuthorityException;
-import com.fundy.FundyBE.global.exception.customException.NoUserException;
-import com.fundy.FundyBE.global.exception.customException.RefreshTokenException;
-import com.fundy.FundyBE.global.exception.customException.S3UploadException;
+import com.fundy.FundyBE.global.exception.customexception.AuthTypeMismatchException;
+import com.fundy.FundyBE.global.exception.customexception.DuplicateUserException;
+import com.fundy.FundyBE.global.exception.customexception.NoAuthorityException;
+import com.fundy.FundyBE.global.exception.customexception.NoUserException;
+import com.fundy.FundyBE.global.exception.customexception.RefreshTokenException;
+import com.fundy.FundyBE.global.exception.customexception.S3UploadException;
 import com.fundy.FundyBE.global.exception.response.ExceptionResponse;
 import io.swagger.v3.oas.annotations.Hidden;
 import lombok.extern.slf4j.Slf4j;

@@ -1,7 +1,7 @@
 package com.fundy.FundyBE.global.validation.user;
 
 import com.fundy.FundyBE.domain.user.repository.UserRepository;
-import com.fundy.FundyBE.global.exception.customException.DuplicateUserException;
+import com.fundy.FundyBE.global.exception.customexception.DuplicateUserException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

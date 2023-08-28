@@ -1,4 +1,4 @@
-package com.fundy.FundyBE.global.exception.customException;
+package com.fundy.FundyBE.global.exception.customexception;
 
 public class AuthTypeMismatchException extends RuntimeException{
     private AuthTypeMismatchException(String message) {

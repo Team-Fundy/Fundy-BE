@@ -1,4 +1,4 @@
-package com.fundy.FundyBE.global.exception.customException;
+package com.fundy.FundyBE.global.exception.customexception;
 
 public class NoUserException extends RuntimeException{
     private NoUserException(String message) {

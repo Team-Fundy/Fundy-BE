@@ -1,4 +1,4 @@
-package com.fundy.FundyBE.global.exception.customException;
+package com.fundy.FundyBE.global.exception.customexception;
 
 public class S3UploadException extends RuntimeException {
     private S3UploadException(String message) { super(message); }
