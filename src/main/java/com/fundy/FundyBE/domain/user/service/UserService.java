@@ -7,11 +7,11 @@ import com.fundy.FundyBE.domain.user.repository.UserRepository;
 import com.fundy.FundyBE.domain.user.service.dto.request.LoginServiceRequest;
 import com.fundy.FundyBE.domain.user.service.dto.request.SignUpServiceRequest;
 import com.fundy.FundyBE.domain.user.service.dto.response.AvailableNicknameResponse;
+import com.fundy.FundyBE.domain.user.service.dto.response.TokenInfoResponse;
 import com.fundy.FundyBE.domain.user.service.dto.response.UserInfoResponse;
-import com.fundy.FundyBE.global.component.email.AsyncEmailSender;
 import com.fundy.FundyBE.global.component.jwt.JwtProvider;
-import com.fundy.FundyBE.global.component.jwt.TokenInfo;
-import com.fundy.FundyBE.global.component.jwt.TokenType;
+import com.fundy.FundyBE.global.component.jwt.JwtUtil;
+import com.fundy.FundyBE.global.component.jwt.dto.response.TokenInfo;
 import com.fundy.FundyBE.global.config.redis.logoutInfo.LogoutInfo;
 import com.fundy.FundyBE.global.config.redis.logoutInfo.LogoutInfoRedisRepository;
 import com.fundy.FundyBE.global.config.redis.refreshInfo.RefreshInfo;
@@ -34,6 +34,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Random;
 
 @Slf4j
@@ -46,7 +47,6 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final JwtProvider jwtProvider;
-    private final AsyncEmailSender emailSender;
     private final RefreshInfoRedisRepository refreshInfoRedisRepository;
     private final LogoutInfoRedisRepository logoutInfoRedisRepository;
 
@@ -89,7 +89,7 @@ public class UserService {
     }
 
     @Transactional
-    public TokenInfo login(final LoginServiceRequest loginServiceRequest) {
+    public TokenInfoResponse login(final LoginServiceRequest loginServiceRequest) {
         if(!findByEmailOrElseThrow(loginServiceRequest.getEmail()).getAuthType().equals(AuthType.EMAIL)) {
             throw AuthTypeMismatchException.createBasic();
         }
@@ -107,13 +107,16 @@ public class UserService {
                 .refreshToken(tokenInfo.getRefreshToken())
                 .build());
 
-        return jwtProvider.generateToken(authentication);
+        return TokenInfoResponse.builder()
+                .accessToken(tokenInfo.getAccessToken())
+                .refreshToken(tokenInfo.getRefreshToken())
+                .build();
     }
     @Transactional
-    public TokenInfo reissueToken(HttpServletRequest request) {
-        String refreshToken = jwtProvider.resolveToken(request);
+    public TokenInfoResponse reissueToken(HttpServletRequest request) {
+        String refreshToken = JwtUtil.resolveToken(request);
 
-        if(refreshToken == null || !jwtProvider.isVerifyToken(refreshToken, TokenType.REFRESH))
+        if(refreshToken == null || !jwtProvider.isVerifyRefreshToken(refreshToken))
             throw RefreshTokenException.createBasic();
 
         RefreshInfo refreshInfo = refreshInfoRedisRepository.findByRefreshToken(refreshToken).orElseThrow(RefreshTokenException::createBasic);
@@ -121,13 +124,16 @@ public class UserService {
         refreshInfo.setRefreshToken(tokenInfo.getRefreshToken());
         refreshInfoRedisRepository.save(refreshInfo);
 
-        return tokenInfo;
+        return TokenInfoResponse.builder()
+                .accessToken(tokenInfo.getAccessToken())
+                .refreshToken(tokenInfo.getRefreshToken())
+                .build();
     }
 
     @Transactional
     public void logout(HttpServletRequest request) {
         // accessToken 유효성 검사는 Filter에서 진웃
-        String accessToken = jwtProvider.resolveToken(request);
+        String accessToken = JwtUtil.resolveToken(request);
 
         Authentication authentication = jwtProvider.getAuthentication(accessToken);
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
@@ -188,26 +194,22 @@ public class UserService {
     }
 
     private String useBasicImageIsNull(String url) {
-        if(url == null) {
-            // TODO: 기본 URL을 사진 확정되면 바꾸어야함.
-            String BASIC_URL = "https://austinpeopleworks.com/wp-content/uploads/2020/12/blank-profile-picture-973460_1280.png";
-            return BASIC_URL;
-        }
-        return url;
+        // TODO: 기본 URL을 사진 확정되면 바꾸어야함.
+        return Objects.requireNonNullElse(url, "https://austinpeopleworks.com/wp-content/uploads/2020/12/blank-profile-picture-973460_1280.png");
     }
 
     private String generateRandomString(int length) {
         String characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         Random random = new Random();
 
-        String randomString = "";
+        StringBuilder randomString = new StringBuilder();
         for(int i=0;i<length;i++)
-            randomString += characters.charAt(random.nextInt(characters.length()));
+            randomString.append(characters.charAt(random.nextInt(characters.length())));
 
-        return randomString;
+        return randomString.toString();
     }
 
     private FundyUser findByEmailOrElseThrow(String email) {
-        return userRepository.findByEmail(email).orElseThrow(() -> NoUserException.createBasic());
+        return userRepository.findByEmail(email).orElseThrow(NoUserException::createBasic);
     }
 }

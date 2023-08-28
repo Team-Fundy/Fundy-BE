@@ -5,7 +5,8 @@ import com.fundy.FundyBE.domain.user.repository.FundyRole;
 import com.fundy.FundyBE.domain.user.repository.FundyUser;
 import com.fundy.FundyBE.domain.user.repository.UserRepository;
 import com.fundy.FundyBE.global.component.jwt.JwtProvider;
-import com.fundy.FundyBE.global.component.jwt.TokenInfo;
+import com.fundy.FundyBE.global.component.jwt.JwtUtil;
+import com.fundy.FundyBE.global.component.jwt.dto.response.TokenInfo;
 import com.fundy.FundyBE.global.config.redis.logoutInfo.LogoutInfoRedisRepository;
 import com.fundy.FundyBE.global.config.redis.refreshInfo.RefreshInfo;
 import com.fundy.FundyBE.global.config.redis.refreshInfo.RefreshInfoRedisRepository;
@@ -56,6 +57,7 @@ public class SecurityConfig {
     private final RefreshInfoRedisRepository refreshInfoRedisRepository;
     private final UserRepository userRepository;
     private final LogoutInfoRedisRepository logoutInfoRedisRepository;
+    // FIXME: 서비스할 때 고쳐야함;
     private final String OAUTH2_CLIENT_PATH = "http://localhost:3000/oauth2";
 
     @Bean
@@ -127,7 +129,7 @@ public class SecurityConfig {
     }
 
     private JwtExceptionResponse getJwtExceptionResponse(HttpServletRequest request) {
-        String token = jwtProvider.resolveToken(request);
+        String token = JwtUtil.resolveToken(request);
         if (token!=null && jwtProvider.canRefresh(token)) {
             if (logoutInfoRedisRepository.findByAccessToken(token).isPresent()) {
                 return JwtExceptionResponse.builder()

@@ -11,9 +11,10 @@ import com.fundy.FundyBE.domain.user.service.dto.request.SignUpServiceRequest;
 import com.fundy.FundyBE.domain.user.service.dto.request.VerifyEmailCodeServiceRequest;
 import com.fundy.FundyBE.domain.user.service.dto.response.AvailableNicknameResponse;
 import com.fundy.FundyBE.domain.user.service.dto.response.EmailCodeResponse;
+import com.fundy.FundyBE.domain.user.service.dto.response.TokenInfoResponse;
 import com.fundy.FundyBE.domain.user.service.dto.response.UserInfoResponse;
 import com.fundy.FundyBE.domain.user.service.dto.response.VerifyEmailResponse;
-import com.fundy.FundyBE.global.component.jwt.TokenInfo;
+import com.fundy.FundyBE.global.component.jwt.dto.response.TokenInfo;
 import com.fundy.FundyBE.global.component.s3.S3Uploader;
 import com.fundy.FundyBE.global.exception.response.ExceptionResponse;
 import com.fundy.FundyBE.global.exception.response.JwtExceptionResponse;
@@ -79,13 +80,13 @@ public class UserController {
     @ApiResponse(responseCode = "401", description = "로그인 에러",
             content = @Content(schema = @Schema(implementation = ExceptionResponse.class)))
     @PostMapping("/login")
-    public GlobalResponse<TokenInfo> login(@RequestBody @Valid final LoginRequest loginRequest) {
-        TokenInfo tokenInfo = userService.login(LoginServiceRequest.builder()
+    public GlobalResponse<TokenInfoResponse> login(@RequestBody @Valid final LoginRequest loginRequest) {
+        TokenInfoResponse tokenInfoResponse = userService.login(LoginServiceRequest.builder()
                 .email(loginRequest.getEmail())
                 .password(loginRequest.getPassword()).build());
-        return GlobalResponse.<TokenInfo>builder()
+        return GlobalResponse.<TokenInfoResponse>builder()
                 .message("User login Successful")
-                .result(tokenInfo)
+                .result(tokenInfoResponse)
                 .build();
     }
 
@@ -159,8 +160,8 @@ public class UserController {
     @ApiResponse(responseCode = "403", description = "토큰 이상",
             content = @Content(schema = @Schema(implementation = JwtExceptionResponse.class)))
     @GetMapping("/reissue")
-    GlobalResponse<TokenInfo> reissueToken(HttpServletRequest request) {
-        return GlobalResponse.<TokenInfo>builder()
+    GlobalResponse<TokenInfoResponse> reissueToken(HttpServletRequest request) {
+        return GlobalResponse.<TokenInfoResponse>builder()
                 .message("재발급 성공")
                 .result(userService.reissueToken(request))
                 .build();

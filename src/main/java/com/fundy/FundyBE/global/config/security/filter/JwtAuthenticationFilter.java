@@ -1,7 +1,7 @@
 package com.fundy.FundyBE.global.config.security.filter;
 
 import com.fundy.FundyBE.global.component.jwt.JwtProvider;
-import com.fundy.FundyBE.global.component.jwt.TokenType;
+import com.fundy.FundyBE.global.component.jwt.JwtUtil;
 import com.fundy.FundyBE.global.config.redis.logoutInfo.LogoutInfoRedisRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.GenericFilter;
@@ -28,14 +28,22 @@ public class JwtAuthenticationFilter extends GenericFilter {
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        String token = jwtProvider.resolveToken((HttpServletRequest) request);
-        if(!((HttpServletRequest) request).getRequestURI().equals("/api/user/reissue")) {
-            if(token != null && jwtProvider.isVerifyToken(token, TokenType.ACCESS)
-            && logoutInfoRedisRepository.findByAccessToken(token).isEmpty()) {
-                Authentication authentication = jwtProvider.getAuthentication(token);
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-            }
+        String token = JwtUtil.resolveToken((HttpServletRequest) request);
+        if(!isReissuePath(request) && isAvailableToken(token)) {
+            Authentication authentication = jwtProvider.getAuthentication(token);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
         }
+
         chain.doFilter(request,response);
+    }
+
+    private boolean isReissuePath(ServletRequest request) {
+        return ((HttpServletRequest) request).getRequestURI().equals("/api/user/reissue");
+    }
+
+    private boolean isAvailableToken(String token) {
+        return token != null
+                && jwtProvider.isVerifyAccessToken(token)
+                && logoutInfoRedisRepository.findByAccessToken(token).isEmpty();
     }
 }

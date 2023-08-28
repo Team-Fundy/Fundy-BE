@@ -1,17 +1,13 @@
 package com.fundy.FundyBE.global.component.jwt;
 
 import com.fundy.FundyBE.domain.user.repository.FundyRole;
+import com.fundy.FundyBE.global.component.jwt.dto.response.TokenInfo;
 import com.fundy.FundyBE.global.config.redis.refreshInfo.RefreshInfo;
 import com.fundy.FundyBE.global.exception.customException.NoAuthorityException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.UnsupportedJwtException;
-import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.security.Keys;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,35 +17,25 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import java.security.Key;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 @Component
 public class JwtProvider {
     private final String AUTH_CLAIM_NAME = "auth";
-
-    private final long ACCESS_DURATION = 2 * 60 * 60 * 1000L; // 2시간
-    private final long REFRESH_DURATION = 30 * 24 * 60 * 60 * 1000L; // 30일
-
     private final Key accessKey;
     private final Key refreshKey;
 
     public JwtProvider(@Value("${jwt.secret.access}") String secretAccessKey,
                        @Value("${jwt.secret.refresh}") String secretRefreshKey) {
-         this.accessKey = parseKey(secretAccessKey);
-         this.refreshKey = parseKey(secretRefreshKey);
-    }
-
-    private Key parseKey(String secretKey) {
-        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
-        return Keys.hmacShaKeyFor(keyBytes);
+         this.accessKey = JwtUtil.parseKey(secretAccessKey);
+         this.refreshKey = JwtUtil.parseKey(secretRefreshKey);
     }
 
     public TokenInfo generateToken(Authentication authentication) {
@@ -60,7 +46,7 @@ public class JwtProvider {
 
     public TokenInfo generateToken(String email, FundyRole role) {
         return buildTokenInfo(
-                Collections.singletonList(role.getValue()).stream().toList(),
+                Stream.of(role.getValue()).toList(),
                 email);
     }
 
@@ -77,17 +63,23 @@ public class JwtProvider {
     }
 
     private TokenInfo buildTokenInfo(List<String> authorities, String subject) {
+        final long ACCESS_DURATION = 2 * 60 * 60 * 1000L; // 2시간
+        final long REFRESH_DURATION = 30 * 24 * 60 * 60 * 1000L; // 30일
+
         Date now = new Date();
+        Date AccessExpirationDate = new Date(now.getTime() + ACCESS_DURATION);
+        Date RefreshExpirationDate = new Date(now.getTime() + REFRESH_DURATION);
+
         String accessToken = Jwts.builder()
                 .setSubject(subject)
                 .claim(AUTH_CLAIM_NAME, authorities)
                 .setIssuedAt(now)
-                .setExpiration(new Date(now.getTime() + ACCESS_DURATION))
+                .setExpiration(AccessExpirationDate)
                 .signWith(accessKey, SignatureAlgorithm.HS256)
                 .compact();
 
         String refreshToken = Jwts.builder()
-                .setExpiration(new Date(now.getTime() + REFRESH_DURATION))
+                .setExpiration(RefreshExpirationDate)
                 .signWith(refreshKey, SignatureAlgorithm.HS256)
                 .compact();
 
@@ -98,7 +90,7 @@ public class JwtProvider {
     }
 
     public Authentication getAuthentication(String accessToken) {
-        Claims claims = parseClaims(accessToken, TokenType.ACCESS);
+        Claims claims = JwtUtil.parseClaims(accessToken, accessKey);
 
         if(claims.get(AUTH_CLAIM_NAME) == null) {
             NoAuthorityException.createBasic();
@@ -114,53 +106,12 @@ public class JwtProvider {
         return new UsernamePasswordAuthenticationToken(principal, "", authorities);
     }
 
-    public boolean isVerifyToken(String token, TokenType tokenType) {
-        try {
-            Jwts.parserBuilder().setSigningKey(currentKey(tokenType)).build().parseClaimsJws(token);
-            return true;
-        } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
-            log.info("Invalid JWT Token", e);
-        } catch (ExpiredJwtException e) {
-            log.info("Expired JWT Token", e);
-        } catch (UnsupportedJwtException e) {
-            log.info("Unsupported JWT Token", e);
-        } catch (IllegalArgumentException e) {
-            log.info("JWT claims string is empty.", e);
-        }
-        return false;
+    public boolean isVerifyAccessToken(String accessToken) {
+        return JwtUtil.isVerifyToken(accessToken, accessKey);
     }
 
-    private Claims parseClaims(String accessToken, TokenType tokenType) {
-        try {
-            return Jwts.parserBuilder()
-                    .setSigningKey(currentKey(tokenType))
-                    .build()
-                    .parseClaimsJws(accessToken)
-                    .getBody();
-        } catch (ExpiredJwtException e) {
-            return e.getClaims(); // Expired된 Jwt 던짐
-        }
-    }
-
-    private Key currentKey(TokenType tokenType) {
-        if(tokenType.equals(TokenType.ACCESS)) {
-            return accessKey;
-        }
-
-        if(tokenType.equals(TokenType.REFRESH)) {
-            return refreshKey;
-        }
-
-        return null;
-    }
-
-    public String resolveToken(HttpServletRequest request) {
-        String bearerToken = request.getHeader("Authorization");
-        if(StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer")) {
-            return bearerToken.substring(7);
-        }
-
-        return null;
+    public boolean isVerifyRefreshToken(String refreshToken) {
+        return JwtUtil.isVerifyToken(refreshToken, refreshKey);
     }
 
     public boolean canRefresh(String accessToken) {
