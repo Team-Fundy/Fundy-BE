@@ -160,6 +160,7 @@ public class UserService {
                 .available(true)
                 .build();
     }
+
     @Transactional
     public TokenInfo transformCreator(HttpServletRequest request, String email) {
         FundyUser fundyUser = findByEmailOrElseThrow(email);

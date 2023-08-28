@@ -93,7 +93,7 @@ public class JwtProvider {
         Claims claims = JwtUtil.parseClaims(accessToken, accessKey);
 
         if(claims.get(AUTH_CLAIM_NAME) == null) {
-            NoAuthorityException.createBasic();
+            throw NoAuthorityException.createBasic();
         }
 
         List<GrantedAuthority> authorities = ((List<String>) claims.get(AUTH_CLAIM_NAME)).stream()
