@@ -1,4 +1,4 @@
-package com.fundy.FundyBE.global.config.redis.logoutInfo;
+package com.fundy.FundyBE.global.config.redis.logoutinfo;
 
 import jakarta.persistence.Id;
 import lombok.AccessLevel;

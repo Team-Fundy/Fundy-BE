@@ -1,4 +1,4 @@
-package com.fundy.FundyBE.global.config.redis.refreshInfo;
+package com.fundy.FundyBE.global.config.redis.refreshinfo;
 
 import jakarta.persistence.Id;
 import lombok.AccessLevel;

@@ -1,4 +1,4 @@
-package com.fundy.FundyBE.global.config.security.userDetail;
+package com.fundy.FundyBE.global.config.security.userdetail;
 
 import com.fundy.FundyBE.domain.user.repository.FundyUser;
 import com.fundy.FundyBE.global.config.security.oauth2.userInfo.OAuth2UserInfo;

@@ -2,7 +2,7 @@ package com.fundy.FundyBE.global.config.security.filter;
 
 import com.fundy.FundyBE.global.component.jwt.JwtProvider;
 import com.fundy.FundyBE.global.component.jwt.JwtUtil;
-import com.fundy.FundyBE.global.config.redis.logoutInfo.LogoutInfoRedisRepository;
+import com.fundy.FundyBE.global.config.redis.logoutinfo.LogoutInfoRedisRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.GenericFilter;
 import jakarta.servlet.ServletException;

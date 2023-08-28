@@ -7,7 +7,7 @@ import com.fundy.FundyBE.domain.user.repository.UserRepository;
 import com.fundy.FundyBE.global.config.security.oauth2.exception.AuthTypeMismatchOAuth2Exception;
 import com.fundy.FundyBE.global.config.security.oauth2.userInfo.OAuth2UserInfo;
 import com.fundy.FundyBE.global.config.security.oauth2.userInfo.OAuth2UserInfoFactory;
-import com.fundy.FundyBE.global.config.security.userDetail.CustomUserDetails;
+import com.fundy.FundyBE.global.config.security.userdetail.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;

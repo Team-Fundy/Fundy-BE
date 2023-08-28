@@ -2,7 +2,7 @@ package com.fundy.FundyBE.global.component.jwt;
 
 import com.fundy.FundyBE.domain.user.repository.FundyRole;
 import com.fundy.FundyBE.global.component.jwt.dto.response.TokenInfo;
-import com.fundy.FundyBE.global.config.redis.refreshInfo.RefreshInfo;
+import com.fundy.FundyBE.global.config.redis.refreshinfo.RefreshInfo;
 import com.fundy.FundyBE.global.exception.customexception.NoAuthorityException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
