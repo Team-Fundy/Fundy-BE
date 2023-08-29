@@ -1,6 +1,6 @@
 package com.fundy.FundyBE.domain.user.repository.converter;
 
-import com.fundy.FundyBE.domain.user.repository.FundyRole;
+import com.fundy.FundyBE.global.constraint.FundyRole;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 

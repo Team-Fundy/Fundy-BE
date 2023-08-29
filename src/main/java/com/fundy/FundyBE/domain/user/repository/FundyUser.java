@@ -2,6 +2,8 @@ package com.fundy.FundyBE.domain.user.repository;
 
 import com.fundy.FundyBE.domain.user.repository.converter.AuthTypeAttributeConverter;
 import com.fundy.FundyBE.domain.user.repository.converter.RoleAttributeConverter;
+import com.fundy.FundyBE.global.constraint.AuthType;
+import com.fundy.FundyBE.global.constraint.FundyRole;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;

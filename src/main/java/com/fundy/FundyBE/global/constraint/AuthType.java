@@ -1,4 +1,4 @@
-package com.fundy.FundyBE.domain.user.repository;
+package com.fundy.FundyBE.global.constraint;
 
 public enum AuthType {
     EMAIL("EMAIL"),

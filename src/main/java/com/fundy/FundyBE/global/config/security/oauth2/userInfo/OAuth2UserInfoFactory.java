@@ -1,6 +1,6 @@
 package com.fundy.FundyBE.global.config.security.oauth2.userInfo;
 
-import com.fundy.FundyBE.domain.user.repository.AuthType;
+import com.fundy.FundyBE.global.constraint.AuthType;
 
 import java.util.Map;
 

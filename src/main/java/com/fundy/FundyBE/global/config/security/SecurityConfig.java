@@ -1,7 +1,7 @@
 package com.fundy.FundyBE.global.config.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fundy.FundyBE.domain.user.repository.FundyRole;
+import com.fundy.FundyBE.global.constraint.FundyRole;
 import com.fundy.FundyBE.domain.user.repository.FundyUser;
 import com.fundy.FundyBE.domain.user.repository.UserRepository;
 import com.fundy.FundyBE.global.component.jwt.JwtProvider;

@@ -1,7 +1,7 @@
 package com.fundy.FundyBE.domain.user;
 
-import com.fundy.FundyBE.domain.user.repository.AuthType;
-import com.fundy.FundyBE.domain.user.repository.FundyRole;
+import com.fundy.FundyBE.global.constraint.AuthType;
+import com.fundy.FundyBE.global.constraint.FundyRole;
 import com.fundy.FundyBE.domain.user.repository.FundyUser;
 import com.fundy.FundyBE.domain.user.repository.UserRepository;
 import com.fundy.FundyBE.domain.user.service.UserService;

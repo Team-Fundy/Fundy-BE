@@ -1,6 +1,6 @@
 package com.fundy.FundyBE.domain.user.repository.converter;
 
-import com.fundy.FundyBE.domain.user.repository.AuthType;
+import com.fundy.FundyBE.global.constraint.AuthType;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
