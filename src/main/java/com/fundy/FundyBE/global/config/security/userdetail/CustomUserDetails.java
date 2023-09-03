@@ -20,6 +20,10 @@ public class CustomUserDetails implements UserDetails, OAuth2User {
     private final FundyUser user;
     private final OAuth2UserInfo oAuth2UserInfo;
 
+    public FundyUser getUser() {
+        return user;
+    }
+
     @Override
     public Map<String, Object> getAttributes() {
         return oAuth2UserInfo.getAttributes();

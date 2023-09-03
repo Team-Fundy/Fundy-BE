@@ -22,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -37,6 +38,7 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.RedirectStrategy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -77,10 +79,13 @@ public class SecurityConfig {
                                     "/user/info",
                                     "/user/logout").authenticated()
                             .requestMatchers("/user/creator").hasAuthority(FundyRole.NORMAL_USER.getValue())
+                            .requestMatchers(HttpMethod.POST,"/project").hasAuthority(FundyRole.CREATOR.getValue())
                             .anyRequest().permitAll();
                 })
                 .exceptionHandling((exceptionHandler) -> {
-                    exceptionHandler.authenticationEntryPoint(getAuthenticationEntryPoint());
+                    exceptionHandler
+                            .accessDeniedHandler(getAccessDeniedHandler())
+                            .authenticationEntryPoint(getAuthenticationEntryPoint());
                 })
                 .oauth2Login(oauth2LoginConfig -> {
                     oauth2LoginConfig
@@ -100,13 +105,25 @@ public class SecurityConfig {
         return http.build();
     }
 
+    private AccessDeniedHandler getAccessDeniedHandler() {
+        return (request, response, accessDeniedException) -> {
+            ObjectMapper objectMapper = new ObjectMapper();
+            response.setContentType("application/json;charset=UTF-8"); // MediaType.APPLICATION_JSON => 인코딩 문제 존재
+
+            response.setStatus(HttpStatus.FORBIDDEN.value());
+            response.getWriter().write(objectMapper.writeValueAsString(ExceptionResponse.builder()
+                    .message("권한이 없습니다")
+                    .build()));
+        };
+    }
+
     private AuthenticationEntryPoint getAuthenticationEntryPoint() {
         return (request, response, authException) -> {
             ObjectMapper objectMapper = new ObjectMapper();
             response.setContentType("application/json;charset=UTF-8"); // MediaType.APPLICATION_JSON => 인코딩 문제 존재
 
             // 이메일 로그인 문제
-            if(request.getRequestURI().equals("/api/user/login")) {
+            if(request.getRequestURI().equals("/user/login")) {
                 response.setStatus(HttpStatus.UNAUTHORIZED.value());
                 response.getWriter().write(objectMapper.writeValueAsString(ExceptionResponse.builder()
                         .message("로그인에 실패하였습니다")
@@ -114,7 +131,7 @@ public class SecurityConfig {
                 return;
             }
 
-            if(request.getRequestURI().equals("/api/user/logout")) {
+            if(request.getRequestURI().equals("/user/logout")) {
                 response.setStatus(HttpStatus.FORBIDDEN.value());
                 response.getWriter().write(objectMapper.writeValueAsString(ExceptionResponse.builder()
                         .message("로그아웃에 실패하였습니다")

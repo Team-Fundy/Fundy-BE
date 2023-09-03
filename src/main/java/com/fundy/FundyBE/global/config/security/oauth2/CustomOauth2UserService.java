@@ -18,6 +18,8 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
+import java.util.Random;
+
 @RequiredArgsConstructor
 @Service
 @Slf4j
@@ -50,7 +52,7 @@ public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequ
         if(fundyUser == null) {
             return userRepository.save(FundyUser.builder()
                     .email(oAuth2UserInfo.getEmail())
-                    .nickname(oAuth2UserInfo.getName())
+                    .nickname(generateNickname(oAuth2UserInfo.getName()))
                     .profileImage(oAuth2UserInfo.getImageUrl())
                     .role(FundyRole.GUEST)
                     .authType(oAuth2UserInfo.getAuthType())
@@ -62,5 +64,24 @@ public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequ
         }
 
         return fundyUser;
+    }
+
+    private String generateNickname(String nickname) {
+        int RANDOM_STRING_LENGTH = 6;
+        while(userRepository.findByNickname(nickname).isPresent()) {
+            nickname = "유저-"+generateRandomString(RANDOM_STRING_LENGTH);
+        }
+        return nickname;
+    }
+
+    private String generateRandomString(int length) {
+        String characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        Random random = new Random();
+
+        StringBuilder randomString = new StringBuilder();
+        for(int i=0;i<length;i++)
+            randomString.append(characters.charAt(random.nextInt(characters.length())));
+
+        return randomString.toString();
     }
 }

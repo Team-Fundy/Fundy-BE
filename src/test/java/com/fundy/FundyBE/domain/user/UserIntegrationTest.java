@@ -105,7 +105,7 @@ public class UserIntegrationTest extends BaseIntegrationTest {
                 .andDo(print());
 
         // then
-        resultActions.andExpect(status().is4xxClientError());
+        resultActions.andExpect(status().isUnauthorized());
     }
 
     @DisplayName("[성공] 크리에이터 전환")

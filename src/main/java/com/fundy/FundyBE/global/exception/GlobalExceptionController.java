@@ -2,10 +2,13 @@ package com.fundy.FundyBE.global.exception;
 
 import com.fundy.FundyBE.global.exception.customexception.AuthTypeMismatchException;
 import com.fundy.FundyBE.global.exception.customexception.DuplicateUserException;
+import com.fundy.FundyBE.global.exception.customexception.InvalidPeriodException;
 import com.fundy.FundyBE.global.exception.customexception.NoAuthorityException;
+import com.fundy.FundyBE.global.exception.customexception.NoProjectException;
 import com.fundy.FundyBE.global.exception.customexception.NoUserException;
 import com.fundy.FundyBE.global.exception.customexception.RefreshTokenException;
 import com.fundy.FundyBE.global.exception.customexception.S3UploadException;
+import com.fundy.FundyBE.global.exception.customexception.ServerInternalException;
 import com.fundy.FundyBE.global.exception.response.ExceptionResponse;
 import io.swagger.v3.oas.annotations.Hidden;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +20,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 @ControllerAdvice
@@ -30,7 +34,7 @@ public class GlobalExceptionController {
         return makeResponse(e.getBindingResult()
                 .getFieldErrors()
                 .stream().map(fieldError -> fieldError.getDefaultMessage())
-                .collect(Collectors.toList()).toString());
+                .collect(Collectors.toList()));
     }
 
     @ExceptionHandler({DuplicateUserException.class})
@@ -82,8 +86,35 @@ public class GlobalExceptionController {
         return makeResponse(e.getMessage());
     }
 
-    private ExceptionResponse makeResponse(String message) {
-        return ExceptionResponse.builder()
+    @ExceptionHandler({InvalidPeriodException.class})
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    public final ExceptionResponse handleInvalidPeriodException(final InvalidPeriodException e) {
+        return makeResponse(e.getMessage());
+    }
+
+    @ExceptionHandler({NoProjectException.class})
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseBody
+    public final ExceptionResponse handleProjectException(final NoProjectException e) {
+        return makeResponse(e.getMessage());
+    }
+
+    @ExceptionHandler({ServerInternalException.class})
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseBody
+    public final ExceptionResponse handleServerInternalException(final ServerInternalException e) {
+        return makeResponse(e.getMessage());
+    }
+
+    private ExceptionResponse<List<String>> makeResponse(List<String> messages) {
+        return ExceptionResponse.<List<String>>builder()
+                .message(messages)
+                .build();
+    }
+
+    private ExceptionResponse<String> makeResponse(String message) {
+        return ExceptionResponse.<String>builder()
                 .message(message)
                 .build();
     }

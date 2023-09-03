@@ -3,9 +3,11 @@ package com.fundy.FundyBE.global.response;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 @Schema(description = "전체 정상적인 response Wrapper")
+@NoArgsConstructor
 public class GlobalResponse<T> {
     @Schema(description = "API 호출 성공 여부", example = "true")
     private boolean success = true;
