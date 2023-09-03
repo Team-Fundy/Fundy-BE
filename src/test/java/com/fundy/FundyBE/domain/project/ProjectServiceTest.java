@@ -36,9 +36,6 @@ import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("프로젝트 서비스 유닛 테스트")
-// TODO: 테스트 작성하기
-// TODO: RewardService 테스트
-// TODO: GenreService 테스트
 public class ProjectServiceTest {
     @InjectMocks
     private ProjectService projectService;

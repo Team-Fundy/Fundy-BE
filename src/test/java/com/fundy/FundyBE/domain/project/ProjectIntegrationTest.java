@@ -42,7 +42,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @DisplayName("프로젝트 통합테스트")
-// TODO: 테스트 완성하기
 public class ProjectIntegrationTest extends BaseIntegrationTest {
     @Autowired
     UserRepository userRepository;

@@ -15,7 +15,6 @@ import java.util.List;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 @Getter
-//TODO: 채워놓기
 public class UploadProjectServiceRequest {
     private String name;
     private List<String> mainImages;
