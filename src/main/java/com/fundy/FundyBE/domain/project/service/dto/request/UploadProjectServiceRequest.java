@@ -17,7 +17,8 @@ import java.util.List;
 @Getter
 public class UploadProjectServiceRequest {
     private String name;
-    private List<String> mainImages;
+    private String thumbnail;
+    private List<String> subMedias;
     private List<String> genres;
     private MultipartFile descriptionFile;
     private LocalDateTime startDateTime;
@@ -26,4 +27,5 @@ public class UploadProjectServiceRequest {
     private Day devNoteUploadDay;
     private List<ProjectRewardServiceRequest> rewards;
     private String userEmail;
+    private boolean isPromotion;
 }

@@ -1,7 +1,9 @@
 package com.fundy.FundyBE.domain.project.subdomain.reward.repository;
 
 import com.fundy.FundyBE.domain.project.repository.Project;
+import com.fundy.FundyBE.domain.project.subdomain.reward.repository.converter.ItemsAttributeConverter;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -11,6 +13,8 @@ import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -25,8 +29,9 @@ public class Reward {
     @Column(name = "MINIMUM_PRICE", nullable = false)
     private int minimumPrice;
 
-    @Column(name = "DESCRIPTION", nullable = false)
-    private String description;
+    @Convert(converter = ItemsAttributeConverter.class)
+    @Column(name = "ITEMS", nullable = false)
+    private List<String> items;
 
     @Column(name = "image")
     private String image;
@@ -36,10 +41,10 @@ public class Reward {
     private Project project;
 
     @Builder
-    private Reward(String name, int minimumPrice, String description, String image, Project project) {
+    private Reward(String name, int minimumPrice, List<String> items, String image, Project project) {
         this.name = name;
         this.minimumPrice = minimumPrice;
-        this.description = description;
+        this.items = items;
         this.image = image;
         this.project = project;
     }

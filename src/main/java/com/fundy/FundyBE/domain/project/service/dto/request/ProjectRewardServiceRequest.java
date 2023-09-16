@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Builder
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
@@ -13,6 +15,6 @@ import lombok.NoArgsConstructor;
 public class ProjectRewardServiceRequest {
     private String name;
     private String image;
-    private String description;
+    private List<String> items;
     private int minimumPrice;
 }

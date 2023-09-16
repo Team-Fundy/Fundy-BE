@@ -22,6 +22,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -40,7 +44,9 @@ public class ProjectService {
         Project project = projectRepository.save(Project.builder()
                 .user(owner)
                 .name(request.getName())
-                .mainImages(request.getMainImages())
+                .thumbnail(request.getThumbnail())
+                .subMedias(request.getSubMedias())
+                .isPromotion(request.isPromotion())
                 .description(multipartFileToString(request.getDescriptionFile()))
                 .devNoteUploadTerm(DevNoteUploadTerm.builder()
                         .weekCycle(request.getDevNoteUploadCycle())
@@ -50,9 +56,15 @@ public class ProjectService {
                         request.getStartDateTime(), request.getEndDateTime()))
                 .build());
 
+        System.out.println(request.isPromotion());
+        if(request.isPromotion()) {
+            System.out.println("is promotion");
+            return project.getId();
+        }
+
         genreService.saveAllGenres(SaveAllGenresServiceRequest.builder()
                 .projectId(project.getId())
-                .genreNames(request.getGenres().stream()
+                .genreNames(removeDuplicate(request.getGenres()).stream()
                         .map(GenreName::ofKorean)
                         .collect(Collectors.toList()))
                 .build());
@@ -64,12 +76,17 @@ public class ProjectService {
                             .name(reward.getName())
                             .image(reward.getImage())
                             .minimumPrice(reward.getMinimumPrice())
-                            .description(reward.getDescription())
+                            .items(reward.getItems())
                             .build())
                     .collect(Collectors.toList()))
             .build());
 
         return project.getId();
+    }
+
+    private List<String> removeDuplicate(List<String> target) {
+        Set<String> set = new HashSet<>(target);
+        return new ArrayList<String>(set);
     }
 
     private String multipartFileToString(final MultipartFile multipartFile) {

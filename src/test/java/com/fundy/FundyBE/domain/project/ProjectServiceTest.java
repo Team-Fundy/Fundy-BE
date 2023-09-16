@@ -61,12 +61,12 @@ public class ProjectServiceTest {
                         .image("image")
                         .minimumPrice(2000)
                         .name("reward 1")
-                        .description("des 1")
+                        .items(Arrays.asList("i1"))
                 .build());
         rewards.add(ProjectRewardServiceRequest.builder()
                 .minimumPrice(3000)
                 .name("reward 2")
-                .description("des 2")
+                .items(Arrays.asList("i2"))
                 .build());
 
         File file = new File("src/test/java/resources/test.html");
@@ -78,8 +78,10 @@ public class ProjectServiceTest {
                 .name("project")
                 .userEmail("test01@naver.com")
                 .startDateTime(startDateTime)
+                .thumbnail("http://이미지")
                 .endDateTime(endDateTime) // 2주
-                .mainImages(Collections.singletonList("image1"))
+                .subMedias(Collections.singletonList("image1"))
+                .isPromotion(false)
                 .genres(Arrays.asList("액션", "슈팅"))
                 .descriptionFile(new MockMultipartFile("test.html", new FileInputStream(file)))
                 .devNoteUploadCycle(2)

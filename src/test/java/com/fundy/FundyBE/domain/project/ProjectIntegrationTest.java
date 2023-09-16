@@ -67,6 +67,58 @@ public class ProjectIntegrationTest extends BaseIntegrationTest {
                 .andExpect(jsonPath("$.result", hasSize(GenreName.values().length)));
     }
 
+    @DisplayName("[성공] 홍보용 프로젝트 업로드")
+    @Test
+    @WithMockUser(username = "creator01@naver.com", authorities = "CREATOR")
+    void uploadPromotionProject() throws Exception {
+        // given
+        FundyUser creator = saveUser(getDefaultCreator());
+        File file = new File("src/test/java/resources/test.html");
+        MockMultipartFile descriptionFile = new MockMultipartFile(
+                "descriptionFile", new FileInputStream(file));
+
+        LocalDateTime now = LocalDateTime.now();
+
+        UploadProjectRequest request = UploadProjectRequest.builder()
+                .name("name")
+                .genres(Arrays.asList("액션", "슈팅"))
+                .thumbnail("http://이미지썸네일")
+                .subMedias(Arrays.asList("http://이미지1", "http://이미지2"))
+                .startDateTime(now.plusDays(1))
+                .endDateTime(now.plusDays(20))
+                .devNoteUploadCycle(2)
+                .devNoteUploadDay(Day.MONDAY)
+                .build();
+
+        MockMultipartFile requestFile = new MockMultipartFile(
+                "request", "",
+                MediaType.APPLICATION_JSON_VALUE,
+                objectMapper.writeValueAsBytes(request));
+
+        // when
+        ResultActions resultActions = mvc.perform(multipart("/project")
+                        .file(descriptionFile)
+                        .file(requestFile)
+                        .queryParam("promotion", "true")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(print());
+
+        // then
+        resultActions.andExpect(status().isOk());
+        resultActions.andExpect(jsonPath("$.result").exists());
+
+        MockHttpServletResponse mvcResponse = resultActions.andReturn().getResponse();
+        mvcResponse.setCharacterEncoding("UTF-8");
+        String content = mvcResponse.getContentAsString();
+
+        GlobalResponse<Long> response = objectMapper.readValue(content, GlobalResponse.class);
+        Number result = response.getResult();
+        Long projectId = result.longValue();
+
+        Project project = projectRepository.findById(projectId).orElseThrow(NoProjectException::createBasic);
+        Assertions.assertThat(project.getUser()).isEqualTo(creator);
+    }
+
     @DisplayName("[성공] 프로젝트 업로드")
     @Test
     @WithMockUser(username = "creator01@naver.com", authorities = "CREATOR")
@@ -83,19 +135,20 @@ public class ProjectIntegrationTest extends BaseIntegrationTest {
                 ProjectRewardRequest.builder()
                         .name("reward 1")
                         .image("http://리워드-이미지")
-                        .description("리워드 1 입니다")
+                        .items(Arrays.asList("아이템1","아이템2"))
                         .minimumPrice(1000)
                         .build(),
                 ProjectRewardRequest.builder()
                         .name("reward 2")
-                        .description("리워드 2 입니다")
+                        .items(Arrays.asList("아이템1","아이템2","아이템3"))
                         .minimumPrice(2000)
                         .build());
 
         UploadProjectRequest request = UploadProjectRequest.builder()
                 .name("name")
                 .genres(Arrays.asList("액션", "슈팅"))
-                .mainImages(Arrays.asList("http://이미지1", "http://이미지2"))
+                .thumbnail("http://이미지썸네일")
+                .subMedias(Arrays.asList("http://이미지1", "http://이미지2"))
                 .startDateTime(now.plusDays(1))
                 .endDateTime(now.plusDays(20))
                 .devNoteUploadCycle(2)
@@ -112,6 +165,7 @@ public class ProjectIntegrationTest extends BaseIntegrationTest {
         ResultActions resultActions = mvc.perform(multipart("/project")
                         .file(descriptionFile)
                         .file(requestFile)
+                        .queryParam("promotion", "false")
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print());
 
@@ -153,19 +207,19 @@ public class ProjectIntegrationTest extends BaseIntegrationTest {
                 ProjectRewardRequest.builder()
                         .name("reward 1")
                         .image("이미지") // 잘못된 케이스
-                        .description("리워드 1 입니다")
                         .minimumPrice(1000)
                         .build(),
                 ProjectRewardRequest.builder()
                         .name("reward 2")
-                        .description("리워드 2 입니다")
+                        .items(Arrays.asList("아이템1"))
                         .minimumPrice(0) // 잘못된 케이스
                         .build());
 
         LocalDateTime now = LocalDateTime.now();
         UploadProjectRequest request = UploadProjectRequest.builder()
                 .name("name")
-                .mainImages(new ArrayList<>()) // 잘못된 케이스
+                .thumbnail("썸네일") //잘못된 케이스
+                .subMedias(new ArrayList<>())
                 .genres(Arrays.asList("액", "슈")) // 잘못된 케이스
                 .startDateTime(now.minusDays(1)) // 잘못된 케이스
                 .endDateTime(now.plusDays(20))
@@ -183,6 +237,7 @@ public class ProjectIntegrationTest extends BaseIntegrationTest {
         ResultActions resultActions = mvc.perform(multipart("/project")
                         .file(descriptionFile)
                         .file(requestFile)
+                        .queryParam("promotion", "false")
                         .accept(MediaType.APPLICATION_JSON_VALUE))
                 .andDo(print());
 

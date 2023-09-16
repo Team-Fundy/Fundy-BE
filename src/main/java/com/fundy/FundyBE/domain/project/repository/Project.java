@@ -1,9 +1,11 @@
 package com.fundy.FundyBE.domain.project.repository;
 
+import com.fundy.FundyBE.domain.project.repository.converter.BooleanAttributeConverter;
 import com.fundy.FundyBE.domain.project.subdomain.genre.repository.Genre;
 import com.fundy.FundyBE.domain.user.repository.FundyUser;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -35,10 +37,13 @@ public class Project {
     @Column(name = "NAME", nullable = false)
     private String name;
 
+    @Column(name = "thumbnail", nullable = false)
+    private String thumbnail;
+
     @ElementCollection
-    @CollectionTable(name = "PROJECT_MAIN_IMAGES")
-    @Column(name = "IMAGE_URL")
-    private List<String> mainImages;
+    @CollectionTable(name = "PROJECT_SUBMEDIA")
+    @Column(name = "MEDIA_URL")
+    private List<String> subMedias;
 
     @Lob
     @Column(name = "DESCRIPTION")
@@ -50,6 +55,10 @@ public class Project {
     @Embedded
     private DevNoteUploadTerm devNoteUploadTerm;
 
+    @Convert(converter = BooleanAttributeConverter.class)
+    @Column(name = "IS_PROMOTION", nullable = false, length = 1)
+    private boolean isPromotion;
+
     @ManyToOne
     @JoinColumn(name = "USER_ID")
     private FundyUser user;
@@ -58,12 +67,16 @@ public class Project {
     private List<Genre> genres = new ArrayList<>(5);
 
     @Builder
-    private Project(String name, List<String> mainImages, String description, ProjectPeriod projectPeriod, DevNoteUploadTerm devNoteUploadTerm, FundyUser user) {
+    private Project(String name, String thumbnail, List<String> subMedias, String description,
+                    ProjectPeriod projectPeriod, DevNoteUploadTerm devNoteUploadTerm, FundyUser user,
+                    boolean isPromotion) {
         this.name = name;
-        this.mainImages = mainImages;
+        this.thumbnail = thumbnail;
+        this.subMedias = subMedias;
         this.description = description;
         this.projectPeriod = projectPeriod;
         this.devNoteUploadTerm = devNoteUploadTerm;
         this.user = user;
+        this.isPromotion = isPromotion;
     }
 }

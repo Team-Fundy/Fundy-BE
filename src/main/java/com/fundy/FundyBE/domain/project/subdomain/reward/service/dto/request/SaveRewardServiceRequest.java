@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Builder
 @Getter
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -13,6 +15,6 @@ import lombok.NoArgsConstructor;
 public class SaveRewardServiceRequest {
     private String name;
     private int minimumPrice;
-    private String description;
+    private List<String> items;
     private String image;
 }

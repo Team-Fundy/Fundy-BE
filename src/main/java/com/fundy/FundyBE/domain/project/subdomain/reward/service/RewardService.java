@@ -27,7 +27,7 @@ public class RewardService {
                         Reward.builder()
                                 .name(reward.getName())
                                 .image(reward.getImage())
-                                .description(reward.getDescription())
+                                .items(reward.getItems())
                                 .minimumPrice(reward.getMinimumPrice())
                                 .project(project)
                                 .build())

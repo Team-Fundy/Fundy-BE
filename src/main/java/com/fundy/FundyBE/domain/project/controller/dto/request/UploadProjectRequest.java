@@ -14,6 +14,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.URL;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,10 +29,14 @@ public class UploadProjectRequest {
     @Size(min = 1, max = 30, message = "프로젝트명은 1~30자입니다")
     private String name;
 
-    @Schema(description = "메인 이미지 리스트(URL은 검토 안함)", example = "[image1, image2]")
-    @NotNull(message = "리워드는 필수입니다")
-    @Size(min = 1, max = 5, message = "메인 이미지는 1~5장 까지입니다")
-    private List<String> mainImages;
+    @Schema(description = "썸네일", example = "https://이미지주소")
+    @NotNull(message = "썸네일은 필수입니다")
+    @URL(message = "썸네일은 URL 형식이어야 합니다")
+    private String thumbnail;
+
+    @Schema(description = "서버 미디어(URL은 검토 안함)", example = "[image1, image2]")
+    @Size(max = 9, message = "서브 미디어는 0~9장 까지입니다")
+    private List<String> subMedias;
 
     @Schema(description = "장르들", example = "[액션, 슈팅]")
     @EnumList(enumClass = GenreName.class, message = "장르명이 올바르지 않습니다")
@@ -59,8 +64,7 @@ public class UploadProjectRequest {
     private Day devNoteUploadDay;
 
     @Schema(description = "리워드")
-    @NotNull(message = "리워드는 필수입니다")
-    @Size(min = 1, max = 20, message = "리워드는 1~20개 사이로 설정해야합니다")
+    @Size(max = 7, message = "리워드는 0~7개 사이로 설정해야합니다")
     @Valid
     private List<ProjectRewardRequest> rewards;
 }

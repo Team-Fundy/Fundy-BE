@@ -11,6 +11,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.URL;
 
+import java.util.List;
+
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -24,10 +26,9 @@ public class ProjectRewardRequest {
     @URL
     private String image;
 
-    @Schema(description = "리워드 설명", example = "해당 리워드는 ...")
-    @NotNull(message = "메인이미지는 필수입니다")
-    @Size(min = 2, max = 50, message = "리워드 설명은 2~50자로 제한되어 있습니다")
-    private String description;
+    @Schema(description = "아이템들", example = "[아이템1,아이템2]")
+    @Size(max = 10, message = "아이템들은 10개까지 설정 가능합니다")
+    private List<String> items;
 
     @Schema(description = "리워드 최소 가격", example = "1000")
     @Min(value = 1, message = "최소 1원 이상이어야 합니다")

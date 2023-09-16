@@ -1,5 +1,6 @@
 package com.fundy.FundyBE.domain.project.controller;
 
+import com.fundy.FundyBE.domain.project.controller.dto.request.ProjectRewardRequest;
 import com.fundy.FundyBE.domain.project.controller.dto.request.UploadProjectRequest;
 import com.fundy.FundyBE.domain.project.service.ProjectService;
 import com.fundy.FundyBE.domain.project.service.dto.request.ProjectRewardServiceRequest;
@@ -22,6 +23,7 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -54,24 +56,20 @@ public class ProjectController {
     public GlobalResponse<Long> uploadProject(
             @RequestPart @Valid UploadProjectRequest request,
             @RequestPart MultipartFile descriptionFile,
+            @RequestParam(name = "promotion", defaultValue = "true") boolean isPromototion,
             @AuthenticationPrincipal User user) {
         UploadProjectServiceRequest uploadProjectServiceRequest = UploadProjectServiceRequest.builder()
                 .name(request.getName())
-                .mainImages(request.getMainImages())
+                .thumbnail(request.getThumbnail())
+                .subMedias(request.getSubMedias())
                 .genres(request.getGenres())
                 .descriptionFile(descriptionFile)
                 .startDateTime(request.getStartDateTime())
                 .endDateTime(request.getEndDateTime())
                 .devNoteUploadCycle(request.getDevNoteUploadCycle())
                 .devNoteUploadDay(request.getDevNoteUploadDay())
-                .rewards(request.getRewards().stream().map((reward)->
-                                ProjectRewardServiceRequest.builder()
-                                        .name(reward.getName())
-                                        .description(reward.getDescription())
-                                        .image(reward.getImage())
-                                        .minimumPrice(reward.getMinimumPrice())
-                                        .build())
-                        .collect(Collectors.toList()))
+                .isPromotion(isPromototion)
+                .rewards(isNotNullConvertRewards(request.getRewards()))
                 .userEmail(user.getUsername())
                 .build();
 
@@ -91,5 +89,20 @@ public class ProjectController {
                 .message("장르 조회 성공")
                 .result(genreService.getAllGenres())
                 .build();
+    }
+
+    private List<ProjectRewardServiceRequest> isNotNullConvertRewards(List<ProjectRewardRequest> rewards) {
+        if(rewards == null) {
+            return null;
+        }
+
+        return rewards.stream().map((reward)->
+                ProjectRewardServiceRequest.builder()
+                        .name(reward.getName())
+                        .items(reward.getItems())
+                        .image(reward.getImage())
+                        .minimumPrice(reward.getMinimumPrice())
+                        .build())
+                .collect(Collectors.toList());
     }
 }
