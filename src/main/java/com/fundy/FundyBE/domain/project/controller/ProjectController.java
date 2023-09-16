@@ -5,6 +5,7 @@ import com.fundy.FundyBE.domain.project.controller.dto.request.UploadProjectRequ
 import com.fundy.FundyBE.domain.project.service.ProjectService;
 import com.fundy.FundyBE.domain.project.service.dto.request.ProjectRewardServiceRequest;
 import com.fundy.FundyBE.domain.project.service.dto.request.UploadProjectServiceRequest;
+import com.fundy.FundyBE.domain.project.service.dto.response.ProjectInfoServiceResponse;
 import com.fundy.FundyBE.domain.project.subdomain.genre.service.GenreService;
 import com.fundy.FundyBE.global.exception.response.ExceptionResponse;
 import com.fundy.FundyBE.global.response.GlobalResponse;
@@ -21,6 +22,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -78,6 +80,19 @@ public class ProjectController {
         return GlobalResponse.<Long>builder()
                 .message("업로드 성공")
                 .result(projectService.uploadProject(uploadProjectServiceRequest))
+                .build();
+    }
+
+    @Operation(summary = "프로젝트 id로 조회", description = "프로젝트의 id로 조")
+    @ApiResponse(responseCode = "200", description = "성공",
+            useReturnTypeSchema = true)
+    @ApiResponse(responseCode = "400", description = "실패",
+            content = @Content(schema = @Schema(implementation = ExceptionResponse.class)))
+    @GetMapping("/{id}")
+    public GlobalResponse<ProjectInfoServiceResponse> findProjectById(@PathVariable("id") long id) {
+        return GlobalResponse.<ProjectInfoServiceResponse>builder()
+                .message("프로젝트 조회 완료")
+                .result(projectService.findById(id))
                 .build();
     }
 

@@ -5,6 +5,7 @@ import com.fundy.FundyBE.domain.project.repository.Project;
 import com.fundy.FundyBE.domain.project.repository.ProjectPeriod;
 import com.fundy.FundyBE.domain.project.repository.ProjectRepository;
 import com.fundy.FundyBE.domain.project.service.dto.request.UploadProjectServiceRequest;
+import com.fundy.FundyBE.domain.project.service.dto.response.ProjectInfoServiceResponse;
 import com.fundy.FundyBE.domain.project.subdomain.genre.service.GenreService;
 import com.fundy.FundyBE.domain.project.subdomain.genre.service.dto.request.SaveAllGenresServiceRequest;
 import com.fundy.FundyBE.domain.project.subdomain.reward.service.RewardService;
@@ -86,9 +87,29 @@ public class ProjectService {
         return project.getId();
     }
 
-    private void findById(long id) {
-        Project project = projectRepository.findById(id).orElseThrow(NoProjectException::createBasic);
+    public ProjectInfoServiceResponse findById(long id) {
+        return projectToResponse(projectRepository.findById(id).orElseThrow(NoProjectException::createBasic));
+    }
 
+    private ProjectInfoServiceResponse projectToResponse(Project project) {
+        return ProjectInfoServiceResponse.builder()
+                .id(project.getId())
+                .name(project.getName())
+                .thumbnail(project.getThumbnail())
+                .subMedias(project.getSubMedias())
+                .genres(project.getGenres().stream()
+                        .map((genre) -> genre.getName().getValue())
+                        .collect(Collectors.toList()))
+                .description(project.getDescription())
+                .subDescription(project.getSubDescription())
+                .isPromotion(project.isPromotion())
+                .startDate(project.getProjectPeriod().getStartDate())
+                .endDate(project.getProjectPeriod().getEndDate())
+                .devNoteUploadCycle(project.getDevNoteUploadTerm().getWeekCycle())
+                .devNoteUploadDay(project.getDevNoteUploadTerm().getDay())
+                .createdAt(project.getCreatedAt())
+                .modifiedAt(project.getModifiedAt())
+                .build();
     }
 
     private List<String> removeDuplicate(List<String> target) {

@@ -1,10 +1,13 @@
 package com.fundy.FundyBE.domain.project;
 
+import com.fundy.FundyBE.domain.project.repository.DevNoteUploadTerm;
 import com.fundy.FundyBE.domain.project.repository.Project;
+import com.fundy.FundyBE.domain.project.repository.ProjectPeriod;
 import com.fundy.FundyBE.domain.project.repository.ProjectRepository;
 import com.fundy.FundyBE.domain.project.service.ProjectService;
 import com.fundy.FundyBE.domain.project.service.dto.request.ProjectRewardServiceRequest;
 import com.fundy.FundyBE.domain.project.service.dto.request.UploadProjectServiceRequest;
+import com.fundy.FundyBE.domain.project.service.dto.response.ProjectInfoServiceResponse;
 import com.fundy.FundyBE.domain.project.subdomain.genre.service.GenreService;
 import com.fundy.FundyBE.domain.project.subdomain.reward.service.RewardService;
 import com.fundy.FundyBE.domain.user.repository.FundyUser;
@@ -100,5 +103,33 @@ public class ProjectServiceTest {
         // then
         Assertions.assertThat(projectId).isEqualTo(1);
         verify(projectRepository, times(1)).save(any(Project.class));
+    }
+
+    @DisplayName("[성공] 프로젝트 조회: Default")
+    @Test
+    void findByProjectIdSuccess() throws IOException {
+        // given
+        long projectId = 1;
+        given(projectRepository.findById(projectId)).willReturn(Optional.of(mockProject));
+        setMockProject(projectId);
+
+        // when
+        ProjectInfoServiceResponse response = projectService.findById(projectId);
+
+        // then
+        Assertions.assertThat(response.getId()).isEqualTo(projectId);
+        verify(projectRepository, times(1)).findById(projectId);
+    }
+
+    void setMockProject(long id) {
+        given(mockProject.getId()).willReturn(id);
+        given(mockProject.getProjectPeriod()).willReturn(ProjectPeriod.of(
+                LocalDateTime.now().plusDays(1),
+                LocalDateTime.now().plusDays(16)
+        ));
+        given(mockProject.getDevNoteUploadTerm()).willReturn(DevNoteUploadTerm.builder()
+                        .weekCycle(4)
+                        .day(Day.FRIDAY)
+                .build());
     }
 }

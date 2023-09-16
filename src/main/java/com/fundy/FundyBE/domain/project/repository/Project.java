@@ -1,5 +1,6 @@
 package com.fundy.FundyBE.domain.project.repository;
 
+import com.fundy.FundyBE.domain.common.BaseTimeEntity;
 import com.fundy.FundyBE.domain.project.repository.converter.BooleanAttributeConverter;
 import com.fundy.FundyBE.domain.project.subdomain.genre.repository.Genre;
 import com.fundy.FundyBE.domain.user.repository.FundyUser;
@@ -29,7 +30,7 @@ import java.util.List;
 @Table(name = "PROJECT")
 @NoArgsConstructor
 @Getter
-public class Project {
+public class Project extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID")
