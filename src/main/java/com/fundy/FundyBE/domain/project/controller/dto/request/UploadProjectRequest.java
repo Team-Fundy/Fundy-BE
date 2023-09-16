@@ -14,6 +14,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.URL;
 
 import java.time.LocalDateTime;
@@ -37,6 +38,11 @@ public class UploadProjectRequest {
     @Schema(description = "서버 미디어(URL은 검토 안함)", example = "[image1, image2]")
     @Size(max = 9, message = "서브 미디어는 0~9장 까지입니다")
     private List<String> subMedias;
+
+    @Schema(description = "간단 설명", example = "이 프로젝트는 뭐 입니다")
+    @NotNull(message = "간단 설명은 필수입니다")
+    @Length(min = 2, max = 500, message = "간단 설명은 2~500글자 사이 입니다")
+    private String subDescription;
 
     @Schema(description = "장르들", example = "[액션, 슈팅]")
     @EnumList(enumClass = GenreName.class, message = "장르명이 올바르지 않습니다")

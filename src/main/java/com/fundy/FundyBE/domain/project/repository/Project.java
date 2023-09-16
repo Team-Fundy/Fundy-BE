@@ -9,6 +9,7 @@ import jakarta.persistence.Convert;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -46,8 +47,11 @@ public class Project {
     private List<String> subMedias;
 
     @Lob
-    @Column(name = "DESCRIPTION")
+    @Column(name = "DESCRIPTION", nullable = false)
     private String description;
+
+    @Column(name = "SUB_DESCRIPTION", nullable = false)
+    private String subDescription;
 
     @Embedded
     private ProjectPeriod projectPeriod;
@@ -60,16 +64,16 @@ public class Project {
     private boolean isPromotion;
 
     @ManyToOne
-    @JoinColumn(name = "USER_ID")
+    @JoinColumn(name = "USER_ID", nullable = false)
     private FundyUser user;
 
-    @OneToMany(mappedBy = "project")
+    @OneToMany(mappedBy = "project", fetch = FetchType.EAGER)
     private List<Genre> genres = new ArrayList<>(5);
 
     @Builder
     private Project(String name, String thumbnail, List<String> subMedias, String description,
                     ProjectPeriod projectPeriod, DevNoteUploadTerm devNoteUploadTerm, FundyUser user,
-                    boolean isPromotion) {
+                    boolean isPromotion, String subDescription) {
         this.name = name;
         this.thumbnail = thumbnail;
         this.subMedias = subMedias;
@@ -78,5 +82,6 @@ public class Project {
         this.devNoteUploadTerm = devNoteUploadTerm;
         this.user = user;
         this.isPromotion = isPromotion;
+        this.subDescription = subDescription;
     }
 }

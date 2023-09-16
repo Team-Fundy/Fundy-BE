@@ -62,6 +62,7 @@ public class ProjectController {
                 .name(request.getName())
                 .thumbnail(request.getThumbnail())
                 .subMedias(request.getSubMedias())
+                .subDescription(request.getSubDescription())
                 .genres(request.getGenres())
                 .descriptionFile(descriptionFile)
                 .startDateTime(request.getStartDateTime())

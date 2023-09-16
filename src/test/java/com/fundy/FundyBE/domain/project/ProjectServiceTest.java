@@ -77,6 +77,7 @@ public class ProjectServiceTest {
         UploadProjectServiceRequest request = UploadProjectServiceRequest.builder()
                 .name("project")
                 .userEmail("test01@naver.com")
+                .subDescription("간단 설명")
                 .startDateTime(startDateTime)
                 .thumbnail("http://이미지")
                 .endDateTime(endDateTime) // 2주

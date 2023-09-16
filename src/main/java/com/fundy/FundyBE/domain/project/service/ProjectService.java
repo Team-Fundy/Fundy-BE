@@ -13,6 +13,7 @@ import com.fundy.FundyBE.domain.project.subdomain.reward.service.dto.request.Sav
 import com.fundy.FundyBE.domain.user.repository.FundyUser;
 import com.fundy.FundyBE.domain.user.repository.UserRepository;
 import com.fundy.FundyBE.global.constraint.GenreName;
+import com.fundy.FundyBE.global.exception.customexception.NoProjectException;
 import com.fundy.FundyBE.global.exception.customexception.NoUserException;
 import com.fundy.FundyBE.global.exception.customexception.ServerInternalException;
 import lombok.RequiredArgsConstructor;
@@ -46,6 +47,7 @@ public class ProjectService {
                 .name(request.getName())
                 .thumbnail(request.getThumbnail())
                 .subMedias(request.getSubMedias())
+                .subDescription(request.getSubDescription())
                 .isPromotion(request.isPromotion())
                 .description(multipartFileToString(request.getDescriptionFile()))
                 .devNoteUploadTerm(DevNoteUploadTerm.builder()
@@ -82,6 +84,11 @@ public class ProjectService {
             .build());
 
         return project.getId();
+    }
+
+    private void findById(long id) {
+        Project project = projectRepository.findById(id).orElseThrow(NoProjectException::createBasic);
+
     }
 
     private List<String> removeDuplicate(List<String> target) {

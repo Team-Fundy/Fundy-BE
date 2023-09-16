@@ -81,6 +81,7 @@ public class ProjectIntegrationTest extends BaseIntegrationTest {
 
         UploadProjectRequest request = UploadProjectRequest.builder()
                 .name("name")
+                .subDescription("간단 설명")
                 .genres(Arrays.asList("액션", "슈팅"))
                 .thumbnail("http://이미지썸네일")
                 .subMedias(Arrays.asList("http://이미지1", "http://이미지2"))
@@ -147,6 +148,7 @@ public class ProjectIntegrationTest extends BaseIntegrationTest {
         UploadProjectRequest request = UploadProjectRequest.builder()
                 .name("name")
                 .genres(Arrays.asList("액션", "슈팅"))
+                .subDescription("간단 설명")
                 .thumbnail("http://이미지썸네일")
                 .subMedias(Arrays.asList("http://이미지1", "http://이미지2"))
                 .startDateTime(now.plusDays(1))
@@ -219,6 +221,7 @@ public class ProjectIntegrationTest extends BaseIntegrationTest {
         UploadProjectRequest request = UploadProjectRequest.builder()
                 .name("name")
                 .thumbnail("썸네일") //잘못된 케이스
+                .subDescription("간단 설명")
                 .subMedias(new ArrayList<>())
                 .genres(Arrays.asList("액", "슈")) // 잘못된 케이스
                 .startDateTime(now.minusDays(1)) // 잘못된 케이스

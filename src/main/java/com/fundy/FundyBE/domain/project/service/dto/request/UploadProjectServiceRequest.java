@@ -18,6 +18,7 @@ import java.util.List;
 public class UploadProjectServiceRequest {
     private String name;
     private String thumbnail;
+    private String subDescription;
     private List<String> subMedias;
     private List<String> genres;
     private MultipartFile descriptionFile;
