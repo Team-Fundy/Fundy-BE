@@ -3,7 +3,9 @@ package com.fundy.FundyBE.domain.project;
 import com.fundy.FundyBE.BaseIntegrationTest;
 import com.fundy.FundyBE.domain.project.controller.dto.request.ProjectRewardRequest;
 import com.fundy.FundyBE.domain.project.controller.dto.request.UploadProjectRequest;
+import com.fundy.FundyBE.domain.project.repository.DevNoteUploadTerm;
 import com.fundy.FundyBE.domain.project.repository.Project;
+import com.fundy.FundyBE.domain.project.repository.ProjectPeriod;
 import com.fundy.FundyBE.domain.project.repository.ProjectRepository;
 import com.fundy.FundyBE.domain.project.subdomain.genre.repository.Genre;
 import com.fundy.FundyBE.domain.project.subdomain.genre.repository.GenreRepository;
@@ -247,6 +249,58 @@ public class ProjectIntegrationTest extends BaseIntegrationTest {
         // then
         resultActions.andExpect(status().isBadRequest());
         resultActions.andExpect(jsonPath("$.message", hasSize(5)));
+    }
+
+    @DisplayName("[성공] 리워드 조회")
+    @Test
+    void getReward() throws Exception{
+        // given
+        Project project = Project.builder()
+                .name("이름")
+                .subDescription("하이")
+                .isPromotion(false)
+                .thumbnail("썸네일")
+                .description("설명")
+                .user(saveUser(getDefaultCreator()))
+                .devNoteUploadTerm(DevNoteUploadTerm.builder()
+                        .weekCycle(2)
+                        .day(Day.FRIDAY)
+                        .build())
+                .projectPeriod(ProjectPeriod.of(LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(16)))
+                .build();
+        projectRepository.save(project);
+
+        genreRepository.saveAll(Arrays.asList(Genre.builder()
+                .name(GenreName.ACTION)
+                .project(project)
+                .build()));
+
+        Reward reward1 = Reward.builder()
+                .name("리워드1")
+                .project(project)
+                .minimumPrice(1000)
+                .image("https://이미지")
+                .build();
+
+        Reward reward2 = Reward.builder()
+                .name("리워드2")
+                .project(project)
+                .minimumPrice(2000)
+                .items(Arrays.asList("아이템1", "아이템2"))
+                .build();
+
+        rewardRepository.saveAll(Arrays.asList(
+                reward1, reward2));
+
+        // when
+        ResultActions resultActions = mvc.perform(get("/project/{id}/rewards",project.getId())
+                        .accept(MediaType.APPLICATION_JSON_VALUE))
+                .andDo(print());
+
+
+        // then
+        resultActions.andExpect(status().isOk());
+        resultActions.andExpect(jsonPath("$.result", hasSize(2)));
     }
 
 

@@ -7,6 +7,8 @@ import com.fundy.FundyBE.domain.project.service.dto.request.ProjectRewardService
 import com.fundy.FundyBE.domain.project.service.dto.request.UploadProjectServiceRequest;
 import com.fundy.FundyBE.domain.project.service.dto.response.ProjectInfoServiceResponse;
 import com.fundy.FundyBE.domain.project.subdomain.genre.service.GenreService;
+import com.fundy.FundyBE.domain.project.subdomain.reward.service.RewardService;
+import com.fundy.FundyBE.domain.project.subdomain.reward.service.dto.response.RewardInfoServiceResponse;
 import com.fundy.FundyBE.global.exception.response.ExceptionResponse;
 import com.fundy.FundyBE.global.response.GlobalResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -40,6 +42,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ProjectController {
     private final ProjectService projectService;
+    private final RewardService rewardService;
     private final GenreService genreService;
 
     @Operation(summary = "프로젝트 업로드", description = "크리에이터 유저가 프로젝트 업로드",
@@ -83,7 +86,7 @@ public class ProjectController {
                 .build();
     }
 
-    @Operation(summary = "프로젝트 id로 조회", description = "프로젝트의 id로 조")
+    @Operation(summary = "프로젝트 id로 조회", description = "프로젝트의 id로 조회")
     @ApiResponse(responseCode = "200", description = "성공",
             useReturnTypeSchema = true)
     @ApiResponse(responseCode = "400", description = "실패",
@@ -93,6 +96,19 @@ public class ProjectController {
         return GlobalResponse.<ProjectInfoServiceResponse>builder()
                 .message("프로젝트 조회 완료")
                 .result(projectService.findById(id))
+                .build();
+    }
+
+    @Operation(summary = "리워드 조회", description = "프로젝트의 id로 리워드 조회")
+    @ApiResponse(responseCode = "200", description = "성공",
+            useReturnTypeSchema = true)
+    @ApiResponse(responseCode = "400", description = "실패",
+            content = @Content(schema = @Schema(implementation = ExceptionResponse.class)))
+    @GetMapping("/{id}/rewards")
+    public GlobalResponse<List<RewardInfoServiceResponse>> findRewardByProjectId(@PathVariable("id") long id) {
+        return GlobalResponse.<List<RewardInfoServiceResponse>>builder()
+                .message("리워드 조회 완료")
+                .result(rewardService.findByProjectId(id))
                 .build();
     }
 

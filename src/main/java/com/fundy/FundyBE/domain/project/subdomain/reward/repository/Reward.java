@@ -12,10 +12,11 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
-
+@Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Reward {
@@ -30,7 +31,7 @@ public class Reward {
     private int minimumPrice;
 
     @Convert(converter = ItemsAttributeConverter.class)
-    @Column(name = "ITEMS", nullable = false)
+    @Column(name = "ITEMS")
     private List<String> items;
 
     @Column(name = "image")

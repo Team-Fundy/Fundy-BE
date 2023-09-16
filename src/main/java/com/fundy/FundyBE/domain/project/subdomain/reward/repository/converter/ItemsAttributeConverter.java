@@ -9,6 +9,10 @@ import java.util.List;
 public class ItemsAttributeConverter implements AttributeConverter<List<String>, String> {
     @Override
     public String convertToDatabaseColumn(List<String> attribute) {
+        if(attribute == null || attribute.size()==0) {
+            return null;
+        }
+
         StringBuilder sb = new StringBuilder();
 
         sb.append(attribute.get(0));
